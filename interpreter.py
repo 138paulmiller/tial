@@ -8,8 +8,8 @@ def parse_source_code(file_path):
     source = open(file_path)
     code = source.read()
     print code
-    p = p.parse(code)
-    print p 
+    root = parser.parse(code)
+     
 
 
 def main():
@@ -17,8 +17,8 @@ def main():
     if argc == 1:  # if only script is called, use as realtime parsing interpter
         command = raw_input(">")
         lines = []
-        while command != 'quit': # while quit command is not entered
-            if command == 'run': # if run command, prompt for file
+        while command is not 'quit': # while quit command is not entered
+            if command is 'run': # if run command, prompt for file
                 parse_source_code((raw_input('File:'))) 
             else:
                 lines.append(parser.parse(command))

@@ -14,7 +14,7 @@ import tok
 
 # Symbols
 START = 'START'
-STATMENT   = 'STATEMENT'
+STATEMENT   = 'STATEMENT'
 EXPRESSION = 'EXPRESSION' # expressions grouped with adders
 EXPRESSION_OP = 'EXPRESSION_OP'# operation with expression
 TERM = 'TERM'       #expressions grouped by multipliers
@@ -26,22 +26,21 @@ EOI = 'EOI' # end of input
 # grammer uses the token tags as terminals and parse tree nodes as nonterminals or symbols
 #   Grammer is a map of symbols. Each symbols matches to a precedence ordered rule list where 
 #   each rule is a list of terminals and nonterminals that define symbol 
-grammer = { START : [[STATMENT, EOI]],
-            STATMENT :     [[EXPRESSION, tok.TERMINATOR]],     # statement rule 1
-
-            EXPRESSION : [[TERM, EXPRESSION_OP]],
+grammer = {
+           
+            EXPRESSION    : [[TERM, EXPRESSION_OP]],
             EXPRESSION_OP : [[tok.PLUS, TERM, EXPRESSION_OP], 
                             [tok.MINUS, TERM, EXPRESSION_OP],
                             [EPSILON]],
 
-            TERM : [[FACTOR, TERM_OP]],
-            TERM_OP : [[tok.MULTIPLY, FACTOR, TERM_OP], 
-                        [tok.DIVIDE, FACTOR, TERM_OP], 
-                        [EPSILON]],
+            TERM          : [[FACTOR, TERM_OP]],
+            TERM_OP       : [[tok.MULTIPLY, FACTOR, TERM_OP], 
+                            [tok.DIVIDE, FACTOR, TERM_OP], 
+                            [EPSILON]],
 
-            FACTOR:   [[tok.NUMBER], # expression rule 1
-                        [tok.IDENTIFIER],
-                        [tok.LEFT_PAREN, EXPRESSION, tok.RIGHT_PAREN]]
+            FACTOR        : [[tok.NUMBER], # expression rule 1
+                            [tok.IDENTIFIER],
+                            [tok.LEFT_PAREN, EXPRESSION, tok.RIGHT_PAREN]]
         }
 
 # returns list of possible symbols that are the first symbol in the rule
@@ -63,26 +62,23 @@ def first_set(symbol):
 #returns list of possible following symbols that can follow the given symbol
 def follow_set(symbol):
     follows  = []
-    if  symbol not in grammer: #terminal
-        return [symbol]
     # search for symbol in every rule of every other symbol
     for rule_symbol in grammer.keys():  # each symbol contains a rule set,  
         for rule in grammer[rule_symbol]:  # iterate through each rule in set for each symbol
             i = 0
             while i <  len(rule):     # check every symbol in rule
-                if rule[i] == symbol:# if rule symbol is equal to symbol and not epsilon
-                    if i+1 < len(rule): # try to get the following symbol in the rule
-                        if  rule[i+1] not in grammer and rule[i+1] not in follows: # if terminal
+                if rule[i] == symbol:# if rule symbol is equal to symbol
+                    if i+1 < len(rule): # try to get the next following symbol in the rule
+                        if rule[i+1] not in grammer: # if terminal
                             follows.append(rule[i+1]) # append rule symbol if terminal
                         else: # if nonterminal, union nonterminal's firsts into follow
                             for first in first_set(rule[i+1]):
-                                if first is not EPSILON:
-                                    if first not in follows: # cannot exist in follows and must not be epsilon
-                                        follows.append(first) # get the first terminal of symbol
-                                else: # if epsilon is a first, append parent symbol's follow set
-                                    follows = set(follows).union(follow_set(rule_symbol))
+                                if first is EPSILON: # concat follow of parent rule
+                                    follows = follows + [x for x in iter(follow_set(rule_symbol)) if x not in follows]
+                                elif first not in follows: # add first if it doesnt already exist
+                                    follows.append(first)
                     elif rule_symbol is not symbol: # if at the end of rule, append the follow set of the parent rule symbol
-                        follows = set(follows).union(follow_set(rule_symbol))
+                        follows = follows + [x for x in iter(follow_set(rule_symbol)) if x not in follows]
                 i = i + 1 
     return follows
 
@@ -94,7 +90,6 @@ def parse(input):
     table = {}
     for symbol in grammer.keys():
         table[symbol] = {} # allocate map for symbol
-
         print "SYMBOL: ", symbol
         firsts = first_set(symbol)
         print "\t\tFirst_Set:", firsts
@@ -102,9 +97,19 @@ def parse(input):
         for first in firsts:
             # add rule whose first matches first
             for rule in grammer[symbol]:
-                if rule[0] is first:
-                    table[symbol][first] = rule
-                    break # added rule, found first
+                if first in first_set(rule[0]):
+                    if first not in table[symbol]: # if symbol, first rule has not been added 
+                        table[symbol][first] = rule
+                    else:
+                        sys.stderr.write('Parse Table Error: Duplicate Rules for ' + symbol + ',' + first)
+        # for first in table[symbol].keys():
+        #     print  '\t', first, '\t', table[symbol][first]
 
-    ##print table
-    stack = [START] # start with statement
+    # table
+    for symbol in table.keys():
+        print symbol, ':'
+        for first in table[symbol].keys():
+            print  '\t', first, '\t', table[symbol][first]
+
+    
+    return "parse return"
