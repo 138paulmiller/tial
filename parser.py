@@ -14,12 +14,12 @@ import tok
 
 # Symbols
 START = 'START'
-STATEMENT   = 'STATEMENT'
-EXPRESSION = 'EXPRESSION' # expressions grouped with adders
-EXPRESSION_OP = 'EXPRESSION_OP'# operation with expression
-TERM = 'TERM'       #expressions grouped by multipliers
-TERM_OP = 'TERM_OP' # operation with term
-FACTOR = 'FACTOR' # basic unit of expression
+ST   = 'STMT'
+E = 'EXPR' # expressions grouped with adders
+E_OP = 'EXPR_OP'# operation with expression
+T = 'TERM'       #expressions grouped by multipliers
+T_OP = 'TERM_OP' # operation with term
+F = 'FACTOR' # basic unit of expression
 EPSILON = 'EPSILON'
 EOI = 'EOI' # end of input
 
@@ -28,19 +28,19 @@ EOI = 'EOI' # end of input
 #   each rule is a list of terminals and nonterminals that define symbol 
 grammer = {
            
-            EXPRESSION    : [[TERM, EXPRESSION_OP]],
-            EXPRESSION_OP : [[tok.PLUS, TERM, EXPRESSION_OP], 
-                            [tok.MINUS, TERM, EXPRESSION_OP],
+            E    : [[T, E_OP]],
+            E_OP : [[tok.ADD, T, E_OP], 
+                            [tok.SUB, T, E_OP],
                             [EPSILON]],
 
-            TERM          : [[FACTOR, TERM_OP]],
-            TERM_OP       : [[tok.MULTIPLY, FACTOR, TERM_OP], 
-                            [tok.DIVIDE, FACTOR, TERM_OP], 
+            T          : [[F, T_OP]],
+            T_OP       : [[tok.MUL, F, T_OP], 
+                            [tok.DIV, F, T_OP], 
                             [EPSILON]],
 
-            FACTOR        : [[tok.NUMBER], # expression rule 1
-                            [tok.IDENTIFIER],
-                            [tok.LEFT_PAREN, EXPRESSION, tok.RIGHT_PAREN]]
+            F        : [[tok.NUM], # expression rule 1
+                            [tok.ID],
+                            [tok.L_PAREN, E, tok.R_PAREN]]
         }
 
 # returns list of possible symbols that are the first symbol in the rule
@@ -82,34 +82,52 @@ def follow_set(symbol):
                 i = i + 1 
     return follows
 
-def parse(input):
-    # returns tokens as (lexeme, tag) 
-    tokens =  lexer.lex(input, tok.definitions) 
-    print "TOKENS: ", tokens
-    # Table[SYMBOL][terminal]   returns production rule
+def initParseTable():
     table = {}
+    nonterminals = []
     for symbol in grammer.keys():
         table[symbol] = {} # allocate map for symbol
         print "SYMBOL: ", symbol
         firsts = first_set(symbol)
+        follows = follow_set(symbol)
         print "\t\tFirst_Set:", firsts
-        print "\t\tFollow_Set:", follow_set(symbol)
+        print "\t\tFollow_Set:", follows
         for first in firsts:
+            if first not in nonterminals:
+                nonterminals.append(first)
             # add rule whose first matches first
             for rule in grammer[symbol]:
                 if first in first_set(rule[0]):
+
                     if first not in table[symbol]: # if symbol, first rule has not been added 
-                        table[symbol][first] = rule
+                        if first is EPSILON: # get follow of parent symbol
+                            # for each follow, assign epsilon
+                            for follow in follows:
+                                table[symbol][follow] = [first] # make epsilon a rule list
+                        else:
+                            table[symbol][first] = rule
                     else:
                         sys.stderr.write('Parse Table Error: Duplicate Rules for ' + symbol + ',' + first)
         # for first in table[symbol].keys():
         #     print  '\t', first, '\t', table[symbol][first]
 
-    # table
+    # print table
+
     for symbol in table.keys():
-        print symbol, ':'
+        print symbol + ':\n'
         for first in table[symbol].keys():
-            print  '\t', first, '\t', table[symbol][first]
+            rule = ''
+            line = '\t' + '{:<10}'.format(first+ ':')
+            for r in table[symbol][first]:
+                rule += r + ' ' 
+            print  line + '[' + rule + ']'
 
     
+
+def parse(input):
+    initParseTable()
+    # returns tokens as (lexeme, tag) 
+    tokens =  lexer.lex(input, tok.definitions) 
+    print "TOKENS: ", tokens
+    # Table[SYMBOL][terminal]   returns production rule
     return "parse return"
