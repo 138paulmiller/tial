@@ -140,46 +140,41 @@ def parse(input):
     if len(tokens) <= 0:
         log.error('\nParser: No TOKENS')
         return None
-    stack = [EOI, START] # push eoi and start on stack
+    token_stack = [(0, EOI), (0, START)] # push eoi and start on stack
     t_i = 0 # current token index
     valid = True
-    while len(stack) > 0 and valid:        
-        print 'tokens', tokens[t_i]
-        print 'stack: ', stack
-        if stack[-1] in table: 
-            print 'rules', table[stack[-1]]
-        else:
-            print 'no rules'
-        if stack[-1] in grammer.keys(): # if top of stack is nonterminal 
+    # token stack contains currently parsed
+    while len(token_stack ) > 0 and valid:  
+        top_token = token_stack[-1]
+        if top_token[1] in grammer.keys(): # if top of stack is nonterminal 
         # get rule to do given symbol and token tag (token[1])
-            if tokens[t_i][1] in table[stack[-1]]: # if theres a rule for symbol
+            if tokens[t_i][1] in table[top_token[1]]: # if theres a rule for symbol
                 # copy rule, as to not affect table's rule when calling pop
                 rule = [] # character list
-                for symbol in table[stack[-1]][tokens[t_i][1]]:    
-                    rule.append(symbol)
+                for symbol in table[top_token[1]][tokens[t_i][1]]:    
+                    rule.append(symbol) # add single symbol 
                 # pop stack if epsilon
-                print stack[-1], ',', tokens[t_i][1], 'rule:',rule
-                stack.pop() # pop symbol and replace if if not epsilon
-                if rule[0] != EPSILON:
+                print top_token[1], ',', tokens[t_i][1], 'rule:', rule
+                token_stack.pop() # pop symbol and replace if if not epsilon
+                if rule[0] != EPSILON: # if not epsilon
                     # add rule symbols in reverse order into stack
                     while len(rule) > 0:
-                        stack.append(rule[-1])
+                        # append null tokens that are used for their tags
+                        token_stack.append((None,rule[-1]))
                         rule.pop()
             else: # no rule for symbol
                 valid = False # reject input
 
-        if stack[-1] == tokens[t_i][1]: # generated a match 
-            print 'Matched Token ',  tokens[t_i][0], 'with ', stack[-1], '...'
+        if top_token[1] == tokens[t_i][1]: # generated a match 
+            print 'Matched Token ',  tokens[t_i], 'with ', str(token_stack[-1]), '...'
             # pop symbol and move to next token
-            stack.pop()
+            token_stack.pop()
             t_i += 1
-
-        raw_input('...')
     
     if valid:
-        print "parser accepted input"   
+        print 'Parsing Accepted Input'
     else:
-        log.error('Parsing Failed: Could not get rule for token:\t'+ str(tokens[t_i]) )
-        log.error('Stack: ' + str(stack))
+        log.error('Parser Rejected Input: Could not get rule for token:\t'+ str(tokens[t_i]) )
+        log.error('Stack: ' + str(token_stack))
 
     return valid
