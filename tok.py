@@ -30,7 +30,7 @@ TERMINATOR = 'TERMINATOR'
 # definitions - corresponds each token terminal with a regex match
 #                       (expression, terminal tag)
 definitions = [
-            (r'-?[0-9]*\.?[0-9]+', NUM),
+            (r'[0-9]*\.?[0-9]+', NUM),
             (r'and', AND),
             (r'or', OR),
             (r'not', NOT),

@@ -12,7 +12,7 @@
 #          tag    ::= categorical identifier defined by lexer
 # The regular expression, tag pairings are then tokenized by eat.py module.
 import re
-import sys
+import log
 # lex 
 # input ::= raw source code 
 # returns token list
@@ -48,6 +48,6 @@ def lex(input, token_exprs):
             else:
                   i = j 
         else:
-            sys.stderr.write("Lexer Error: Invalid symbol" + input[i])
+            log.error("Lexer Error: Invalid symbol" + input[i])
             break
     return tokens

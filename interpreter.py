@@ -15,10 +15,10 @@ def parse_source_code(file_path):
 def main():
     argc = len(sys.argv)
     if argc == 1:  # if only script is called, use as realtime parsing interpter
-        command = raw_input(">")
+        command = raw_input('>')
         lines = []
-        while command is not 'quit': # while quit command is not entered
-            if command is 'run': # if run command, prompt for file
+        while command != 'quit': # while quit command is not entered
+            if command == 'run': # if run command, prompt for file
                 parse_source_code((raw_input('File:'))) 
             else:
                 lines.append(parser.parse(command))
