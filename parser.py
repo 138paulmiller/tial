@@ -139,7 +139,7 @@ class ll1:
             while j < i:
                 tab += '\t'
                 j+=1
-            if len(root) > 1 and root[1] != None: 
+            if len(root) > 1 and root[1] != None and len(root[1]) > 0 : 
                 print tab, '{:<}'.format(root[0])
                 for value in root[1]:
                     self.print_tree(value, i+1)
@@ -149,9 +149,6 @@ class ll1:
                 
 
     def parse_token(self,  root, tokens):
-        print 'Root :', root
-        print 'tokens: ',tokens
-        raw_input('....')
         if root != None and  len(tokens) > -1:
             if root[0] == tokens[0][0]: # roots tag matches token tag, generated a match to terminal
                 root[1] = tokens[0][1] # assign value
@@ -164,12 +161,8 @@ class ll1:
                         token_value = self.parse_token([rule, None], tokens)
                         if token_value != None:
                             value.append(token_value)
-                            print 'value', token_value, '\nrule: ', rule
-                        
-                raw_input('....')
                 if len(value) > 0:
                     root[1] = value
-                    print 'Returning Root:', root
                 else:
                     return None
             return root
@@ -179,21 +172,19 @@ class ll1:
     def parse(self, input):
         tokens =  lexer.lex(input, self.definitions)
         tokens.append((EOI, None)) # append end of input token to end of input 
-        print "TOKENS: ", tokens
         if len(tokens) <= 0:
-            log.error('\nParser: No TOKENS')
+            log.error('Parser: No TOKENS')
             return None
-        # nonterminal tokens contain null values 
-        #  start with start
-        root = self.parse_token(  [START, None], tokens)
-        self.print_tree(root)
+        if self.validate(tokens): # validate syntax
+            # nonterminal tokens contain null values 
+            #  start with start
+            root = self.parse_token(  [START, None], tokens)
+            self.print_tree(root)
+        else:
+            log.error('Invalid Syntax')
         return None
     # the top of the stack will contain all
-    def validate(self, input):
-        # returns tokens as (lexeme, symbol_tag) 
-        tokens =  lexer.lex(input, self.definitions)
-        tokens.append((EOI, None)) # append end of input token to end of input 
-        print "TOKENS: ", tokens
+    def validate(self, tokens):
         if len(tokens) <= 0:
             log.error('\nParser: No TOKENS')
             return None
