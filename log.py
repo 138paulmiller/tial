@@ -1,11 +1,17 @@
 import sys
 
 
-DEBUG = False
+DEBUG = True
 
 def error(msg):
- 	sys.stderr.write('\n'+msg)
+	# print red text msg
+ 	sys.stderr.write('\n\033[31m{}'.format(str(msg)))
 
 def debug(msg):
-	if DEBUG:
-		print msg
+	if DEBUG: # print debug blue
+		print '\n\033[94m{}'.format(str(msg))
+
+
+def write(msg):
+	if DEBUG: # print 
+		print '\033[23m{}'.format( str(msg))

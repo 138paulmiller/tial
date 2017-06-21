@@ -95,9 +95,9 @@ class ll1:
             follows = self.follow_set(symbol)
             
             log.debug("\t\tFirst_Set:")
-            log.debug(firsts)
+            log.debug(str(firsts))
             log.debug("\t\tFollow_Set:")
-            log.debug(follows)
+            log.debug(str(follows))
             for first in firsts:
                 # add rule whose first matches first of rule
                 for rule in self.grammer[symbol]: # for each rule in symbols rule list
@@ -132,41 +132,71 @@ class ll1:
         raw_input('action...')
     
     def print_tree(self, root, i=0):
+        print_str = ''
+        tab = ''
+        j = 0
+        while j <= i:
+            tab += '   '
+            j+=1
         if root != None :
-            tab = ''
-            j = 0
             value = None
-            while j < i:
-                tab += '\t'
-                j+=1
-            if len(root) > 1 and root[1] != None and len(root[1]) > 0 : 
-                print tab, '{:<}'.format(root[0])
-                for value in root[1]:
-                    self.print_tree(value, i+1)
+            if len(root) > 1: 
+                tag = root[0]
+                values = root[1]
+                print_str = '{:<}:'.format(tag)
+                if values != None and len(values) >= 1:
+                    for value in values: # print value
+                        print_str += self.print_tree(value, i+1)
+                else: # value is not a list of values, 
+                    print_str += '{:<}'.format(values)
             else:
-                print tab, '{:<}'.format(root)
-                
+                print_str += '{:<}'.format(root)
+            # green tree
+            return '\n\033[32m' +tab + print_str # show tag and values
+        return '\033[32m ' + EPSILON # null
+
                 
 
     def parse_token(self,  root, tokens):
-        if root != None and  len(tokens) > -1:
+        log.write('TOKENS: ' + str(tokens) + '\n')
+        log.write('ROOT:')
+        print self.print_tree(root)
+        if len(tokens) <= 0: return root # done
+        if root != None: 
             if root[0] == tokens[0][0]: # roots tag matches token tag, generated a match to terminal
                 root[1] = tokens[0][1] # assign value
                 tokens.pop(0)
             elif root[0] in self.table and tokens[0][0]  in self.table[root[0]]: # if root is nonterminal and current token has rules with nonterminal 
                 # parse according to rules
                 value = []
+                if self.table[root[0]][tokens[0][0]] == None:
+                    log.error('PARSER ERROR: No Rule for ROOT:' + str(root[0]))
+                    log.error('ROOT:' + self.print_tree(root))
+                    log.error('TOKENS: ' + str( tokens))
+
+                    return None
                 for rule in self.table[root[0]][tokens[0][0]]:
                     if rule != EPSILON:
                         token_value = self.parse_token([rule, None], tokens)
-                        if token_value != None:
-                            value.append(token_value)
-                if len(value) > 0:
-                    root[1] = value
-                else:
-                    return None
-            return root
-        return None
+                        if token_value != None and len(token_value) > 1:
+                            if token_value[1] != None and token_value[0] == rule: # if the parsed token tag matches rule tag
+                                log.write('RULE PARSED: ' + str(rule) + '\nVALUE:')
+                                print self.print_tree(token_value)
+                                value.append(token_value)
+                            else:
+                                log.error('PARSER ERROR: Parsing ' + root[0] + ' for Rule: ' + str(rule) + ' RETURNED None')
+                                log.error( self.print_tree(token_value))
+                                return None    
+                        else:
+                            log.error('PARSER ERROR: Could not parse RULE:' + str(rule))
+                            log.error('TOKENS: ' + str( tokens))
+                            return None
+                    else:
+                        value.append(None)
+
+                root[1] = value
+                    
+        return root
             
         
     def parse(self, input):
@@ -175,19 +205,17 @@ class ll1:
         if len(tokens) <= 0:
             log.error('Parser: No TOKENS')
             return None
-        if self.validate(tokens): # validate syntax
-            # nonterminal tokens contain null values 
-            #  start with start
-            root = self.parse_token(  [START, None], tokens)
-            self.print_tree(root)
+        self.validate(tokens)
+        root = self.parse_token([START, None], tokens)
+        log.write('PARSED TREE:')
+        if root:
+            print self.print_tree(root)
         else:
-            log.error('Invalid Syntax')
-        return None
+            print root
+        return root
+
     # the top of the stack will contain all
     def validate(self, tokens):
-        if len(tokens) <= 0:
-            log.error('\nParser: No TOKENS')
-            return None
         # nonterminal tokens contain null values 
         token_stack = [(EOI, None), (START, None)] # push eoi and start on stack
         index = 0 # current token index
@@ -202,9 +230,6 @@ class ll1:
                     rule = [] # rule symbol list
                     for symbol in self.table[top_token[0]][tokens[index ][0]]:    
                         rule.append(symbol) # add single symbol 
-                    log.debug(top_token[0])
-                    log.debug(',' +  str(tokens[index ][0]))
-                    log.debug('rule:'+ str(rule))
                     # pop stack for both epsilon and non epsilon cases 
                     #self.parse_token_action(token_stack, tokens, index)
                     token_stack.pop() # pop symbol and replace if not epsilon
@@ -225,9 +250,10 @@ class ll1:
 
         # end parse loop
         if valid:
-            print 'Parsing Accepted Input'
+            log.debug('PARSER VALIDATION: SUCCESS')
         else:
-            log.error('Parser Rejected Input: Could not get rule for token:\t'+ str(tokens[index ]) )
-            log.error('Stack: ' + str(token_stack))
+            log.error('PARSER VALIDATION: FAILED, No RULE in TABLE[next_token][top_token]')
+            log.error('\nTOKEN STACK: ' + str(token_stack))
+            log.error('\nNEXT TOKENS: ' + str(tokens[index:-1]) + '\n')
 
         return valid
