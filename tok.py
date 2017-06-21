@@ -1,7 +1,7 @@
  
 
 
-# token terminal tags
+# token tags, terminal values
 NUM = 'NUM'
 AND = 'AND'
 OR = 'OR'

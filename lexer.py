@@ -1,8 +1,13 @@
-# github.com/138paulmiller
-# CopyLeft :)
+'''github.com/138paulmiller
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS 
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN 
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+''' 
 
 # ASIL lexer
-# This is a basic lexer implementation. All tokens are defined as tuples (lexeme, tag)
+# This is a basic lexer implementation. All tokens are defined as tuples (tag, lexeme)
 # input
 #     token_exprs ::= (match, tag)
 #           match ::= regular expression string (regex match) 
@@ -17,7 +22,7 @@ import log
 # input ::= raw source code 
 # returns token list
 # where lexeme is string representation 
-# A token is a tuple (lexeme, tag) 
+# A token is a tuple (tag, lexeme) 
 def lex(input, token_exprs):
     tokens = [] # list of tokens where a token = (lexeme, tag)
     i = 0
@@ -33,9 +38,8 @@ def lex(input, token_exprs):
             regex_match = regex_obj.match(input, i)
             if regex_match: # if match is not none
                 lexeme = regex_match.group(0) # grab the capture group
-
                 if token_tag: # if the tag is valid token, not whitespace, comments, etc
-                    tokens.append((lexeme, token_tag))
+                    tokens.append((token_tag, lexeme))
                 break #found token
         # end of token expression check, check if any of the
         # token expr matched the symbol string at i,
