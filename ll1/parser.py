@@ -5,37 +5,25 @@ class ll1_parser(object):
     def __init__(self, parse_table):
         self.table = parse_table
 
-
-    def parse_token_action(self,  token_stack, tokens, index):
-        print 'action:', token_stack[-1]
-        print 'stack :', token_stack
-        token_stack.pop()
+    '''  Parse 
         
-        raw_input('action...')
-    
-    def print_tree(self, root, i=0):
-        print_str = ''
-        tab = ''
-        j = 0
-        while j <= i:
-            tab += '   '
-            j+=1
-        if root != None :
-            value = None
-            if len(root) > 1: 
-                tag = root[0]
-                values = root[1]
-                print_str = '{:<}:'.format(tag)
-                if values != None and len(values) >= 1:
-                    for value in values: # print value
-                        print_str += self.print_tree(value, i+1)
-                else: # value is not a list of values, 
-                    print_str += '{:<}'.format(values)
-            else:
-                print_str += '{:<}'.format(root)
-            # green tree
-            return '\n\033[32m' +tab + print_str # show tag and values
-        return '\033[32m ' + self.table.EPSILON # null
+        tokens - list of tokens 
+                token - (symbol_tag, value) with value = (symbol_tag, value)
+                symbol_tag - terminal or nonterminal identifier
+                value - list of tokens that are in order according to production rule for symbol
+        returns - root token
+    '''
+    def parse(self, tokens):
+        # append EOI to token queue
+        tokens.append((self.table.EOI, None)) # append end of input token to end of input 
+        self.validate(tokens)
+        root = self.parse_token([self.table.START, None], tokens)
+        log.write('PARSED TREE:')
+        if root:
+            print self.print_tree(root)
+        else:
+            print root
+        return root
 
     def parse_token(self,  root, tokens):
         if len(tokens) <= 0: return root # done
@@ -72,20 +60,8 @@ class ll1_parser(object):
                     
         return root
             
-    # returns ast root
-    def parse(self, tokens):
-        # append EOI to token queue
-        tokens.append((self.table.EOI, None)) # append end of input token to end of input 
-        self.validate(tokens)
-        root = self.parse_token([self.table.START, None], tokens)
-        log.write('PARSED TREE:')
-        if root:
-            print self.print_tree(root)
-        else:
-            print root
-        return root
 
-    # the top of the stack will contain all
+    # validates syntax using mehod where symbols are popped and rules are pushed onto stack until all symbols, terminal, are
     def validate(self, tokens):
         # nonterminal tokens contain null values 
         token_stack = [(self.table.EOI, None), (self.table.START, None)] # push eoi and start on stack
@@ -96,7 +72,6 @@ class ll1_parser(object):
             top_token = token_stack[-1]
             if top_token[0] == tokens[index ][0]: # generated a match 
                 # take action by calling current token's action function
-                #self.parse_token_action(token_stack, tokens, index)
                 token_stack.pop()
                 index += 1            
             # get rule to do given symbol and token tag (token[1])
@@ -106,7 +81,6 @@ class ll1_parser(object):
                 for symbol in self.table[top_token[0]][tokens[index ][0]]:    
                     rule.append(symbol) # add single symbol 
                 # pop stack for both epsilon and non epsilon cases 
-                #self.parse_token_action(token_stack, tokens, index)
                 token_stack.pop() # pop symbol and replace if not epsilon
                 if rule[0] != self.table.EPSILON: # if not epsilon
                     # add rule symbols in reverse order into stack
@@ -127,3 +101,28 @@ class ll1_parser(object):
             log.error('\nNEXT TOKENS: ' + str(tokens[index:-1]) + '\n')
 
         return valid
+
+
+    def print_tree(self, root, i=0):
+        print_str = ''
+        tab = ''
+        j = 0
+        while j <= i:
+            tab += '   '
+            j+=1
+        if root != None :
+            value = None
+            if len(root) > 1: 
+                tag = root[0]
+                values = root[1]
+                print_str = '{:<}:'.format(tag)
+                if values != None and len(values) >= 1:
+                    for value in values: # print value
+                        print_str += self.print_tree(value, i+1)
+                else: # value is not a list of values, 
+                    print_str += '{:<}'.format(values)
+            else:
+                print_str += '{:<}'.format(root)
+            # green tree
+            return '\n\033[32m' +tab + print_str # show tag and values
+        return '\033[32m ' + self.table.EPSILON # null
