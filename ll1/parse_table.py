@@ -106,14 +106,12 @@ class ll1_parse_table(dict):
     def construct(self):
         for symbol in self.grammer.keys():
             self[symbol] = {} # allocate map for symbol
-            log.debug("SYMBOL: " + str(symbol))
             # find first and follow set
             firsts = self.first_set(symbol)
             follows = self.follow_set(symbol)            
-            log.debug("\t\tFirst_Set:")
-            log.debug(str(firsts))
-            log.debug("\t\tFollow_Set:")
-            log.debug(str(follows))
+            log.debug('SYMBOL: ' + str(symbol))
+            log.debug('\tFirst_Set:' + str(firsts))
+            log.debug('\tFollow_Set:' + str(follows))
             for first in firsts:
                 # add rule whose first matches first of rule
                 for rule in self.grammer[symbol]: # for each rule in symbols rule list

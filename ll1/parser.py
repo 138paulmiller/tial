@@ -11,12 +11,13 @@ class ll1_parser(object):
                 token - (symbol_tag, value) with value = (symbol_tag, value)
                 symbol_tag - terminal or nonterminal identifier
                 value - list of tokens that are in order according to production rule for symbol
-        returns - root token
+        returns - parse tree's root token
     '''
     def parse(self, tokens):
         # append EOI to token queue
         tokens.append((self.table.EOI, None)) # append end of input token to end of input 
         self.validate(tokens)
+        # begin by parsing the start token
         root = self.parse_token([self.table.START, None], tokens)
         log.write('PARSED TREE:')
         if root:
@@ -25,43 +26,60 @@ class ll1_parser(object):
             print root
         return root
 
+    '''
+        Parse token
+            Parses the root token from the given tokens.
+            If the root symbol matches the current token's symbol
+            then assign the roots value to the token's value and remove it.
+            Otherwise, check to see if the current token has a production rule from the root
+            symbol. If no production rule in the table exists
+
+            root - tag, value pair to be parsed
+            tokens - remaining input tokens
+
+            returns parsed root pair 
+    '''
     def parse_token(self,  root, tokens):
-        if len(tokens) <= 0: return root # done
+        if len(tokens) <= 0: return root # done, no tokens
+        # tokens[0] is next token with its symbol tag tokens[0][0]  and its value at tokens[0][1] 
         if root != None: 
             if root[0] == tokens[0][0]: # roots tag matches token tag, generated a match to terminal
                 root[1] = tokens[0][1] # assign value
                 tokens.pop(0)
             elif root[0] in self.table and tokens[0][0]  in self.table[root[0]]: # if root is nonterminal and current token has rules with nonterminal 
-                # parse according to rules
                 value = []
-                if self.table[root[0]][tokens[0][0]] == None:
+                if self.table[root[0]][tokens[0][0]] == None: # no production rule in table from root symbol to next token 
                     log.error('PARSER ERROR: No Rule for ROOT:' + str(root[0]))
                     log.error('ROOT:' + self.print_tree(root))
                     log.error('TOKENS: ' + str( tokens))
                     return None
-                for rule in self.table[root[0]][tokens[0][0]]:
-                    if rule != self.table.EPSILON:
-                        token_value = self.parse_token([rule, None], tokens)
-                        if token_value != None and len(token_value) > 1:
-                            if token_value[1] != None and token_value[0] == rule: # if the parsed token tag matches rule tag
-                                value.append(token_value)
-                            else:
-                                log.error('PARSER ERROR: Parsing ' + root[0] + ' for Rule: ' + str(rule) + ' RETURNED None')
-                                log.error( self.print_tree(token_value))
+                # else, for each symbol in rule 
+                for rule_symbol in self.table[root[0]][tokens[0][0]]:
+                    # parse the remaining tokens for the rule
+                    if rule_symbol != self.table.EPSILON:
+                        # if not epsilon, attempt to parse the remaining tokens for the given symbol in the rule
+                        rule_token = self.parse_token([rule_symbol, None], tokens)
+                        # if rule token parsed is valid and is a token pair(tag, value)
+                        if rule_token != None and len(rule_token) > 1:
+                            # if the parsed token tag matches rule tag
+                            if rule_token[1] != None and rule_token[0] == rule_symbol: 
+                                value.append(rule_token)
+                            else: # could not parse a value for rule_token
+                                log.error('PARSER ERROR: Parsing ' + root[0] + ' for Rule: ' + str(rule_symbol) + ' RETURNED None')
+                                log.error( self.print_tree(rule_token))
                                 return None    
-                        else:
-                            log.error('PARSER ERROR: Could not parse RULE:' + str(rule))
+                        else: # else, rule_symbol could not be parsed
+                            log.error('PARSER ERROR: Could not parse RULE:' + str(rule_symbol))
                             log.error('TOKENS: ' + str( tokens))
                             return None
                     else:
                         value.append(None)
-
-                root[1] = value
-                    
+                root[1] = value # update roots value to the parsed value
         return root
             
 
-    # validates syntax using mehod where symbols are popped and rules are pushed onto stack until all symbols, terminal, are
+    # validates syntax using mehod where symbols are popped and rules are pushed onto stack 
+    # until all symbols, terminal, are are matched
     def validate(self, tokens):
         # nonterminal tokens contain null values 
         token_stack = [(self.table.EOI, None), (self.table.START, None)] # push eoi and start on stack
