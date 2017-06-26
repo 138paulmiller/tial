@@ -69,21 +69,23 @@ definitions = [
 # Grammar consists of a nonterminal to rule list mapping:
 #      Each nonterminal is map to a list of rules where a rule is an inorder list of symbols
 rule_map = {
-            START       : [ [EXPR]   ],
-            
-            EXPR     : [ [TERM, EXPR_OP]   ],
+            START    : [[STMT]],
+
+            STMT     : [[ID, ASSIGN, EXPR]],
+          
+            EXPR     : [[TERM, EXPR_OP]],
             
             EXPR_OP  : [ [ADD, TERM, EXPR_OP], 
-                            [SUB, TERM, EXPR_OP],
-                            [EPSILON]],
+                        [SUB, TERM, EXPR_OP],
+                        [EPSILON]],
             
-            TERM     : [ [FACTOR, TERM_OP]],
+            TERM     : [[FACTOR, TERM_OP]],
             
-            TERM_OP  : [ [MUL, FACTOR, TERM_OP], 
-                            [DIV, FACTOR, TERM_OP], 
-                            [EPSILON]],
+            TERM_OP  : [[MUL, FACTOR, TERM_OP], 
+                        [DIV, FACTOR, TERM_OP], 
+                        [EPSILON]],
 
-            FACTOR   : [ [NUM],
-                            [ID],
-                            [L_PAREN, EXPR, R_PAREN]]
+            FACTOR   : [[NUM],
+                        [ID],
+                        [L_PAREN, EXPR, R_PAREN]]
             }
