@@ -1,19 +1,23 @@
 from ll1 import log 
-
+from ll1 import lexer
 
 class ll1_parser(object):
-    def __init__(self, parse_table):
+    def __init__(self, token_definitions, parse_table):
         self.table = parse_table
-
+        self.token_definitions = token_definitions 
     '''  Parse 
-        
-        tokens - list of tokens 
+        input - raw input string to tokenize and parse
+            tokenizes input string into list of tokens, returned by lexer 
                 token - (symbol_tag, value) with value = (symbol_tag, value)
                 symbol_tag - terminal or nonterminal identifier
                 value - list of tokens that are in order according to production rule for symbol
         returns - parse tree's root token
     '''
-    def parse(self, tokens):
+    def parse(self, input):
+        tokens =  lexer.lex(input, self.token_definitions)
+        if len(tokens) <= 0:
+            log.error('No TOKENS')
+            return None
         # append EOI to token queue
         tokens.append((self.table.EOI, None)) # append end of input token to end of input 
         self.validate(tokens)
@@ -49,11 +53,10 @@ class ll1_parser(object):
             elif root[0] in self.table and tokens[0][0]  in self.table[root[0]]: # if root is nonterminal and current token has rules with nonterminal 
                 value = []
                 if self.table[root[0]][tokens[0][0]] == None: # no production rule in table from root symbol to next token 
-                    log.error('PARSER ERROR: No Rule for ROOT:' + str(root[0]))
-                    log.error('ROOT:' + self.print_tree(root))
-                    log.error('TOKENS: ' + str( tokens))
+                    log.error('ERROR: No Rule for ROOT:' + str(root[0]))
                     return None
                 # else, for each symbol in rule 
+
                 for rule_symbol in self.table[root[0]][tokens[0][0]]:
                     # parse the remaining tokens for the rule
                     if rule_symbol != self.table.EPSILON:
@@ -65,12 +68,10 @@ class ll1_parser(object):
                             if rule_token[1] != None and rule_token[0] == rule_symbol: 
                                 value.append(rule_token)
                             else: # could not parse a value for rule_token
-                                log.error('PARSER ERROR: Parsing ' + root[0] + ' for Rule: ' + str(rule_symbol) + ' RETURNED None')
-                                log.error( self.print_tree(rule_token))
+                                log.error('ERROR: Parsing ' + root[0] + ' for Rule: ' + str(rule_symbol) + ' RETURNED None')
                                 return None    
                         else: # else, rule_symbol could not be parsed
-                            log.error('PARSER ERROR: Could not parse RULE:' + str(rule_symbol))
-                            log.error('TOKENS: ' + str( tokens))
+                            log.error('Could not parse RULE:' + str(rule_symbol) + '\n\tTOKENS: ' + str( tokens))
                             return None
                     else:
                         value.append(None)
@@ -112,11 +113,11 @@ class ll1_parser(object):
 
         # end parse loop
         if valid:
-            log.debug('PARSER VALIDATION: SUCCESS')
+            log.debug('VALIDATION: SUCCESS')
         else:
-            log.error('PARSER VALIDATION: FAILED, No RULE in TABLE[next_token][top_token]')
-            log.error('\nTOKEN STACK: ' + str(token_stack))
-            log.error('\nNEXT TOKENS: ' + str(tokens[index:-1]) + '\n')
+            log.error('VALIDATION: FAILED, No RULE in TABLE[next_token][top_token]')
+            log.error('TOKEN STACK: ' + str(token_stack))
+            log.error('NEXT TOKENS: ' + str(tokens[index:-1]) + '\n')
 
         return valid
 
@@ -136,11 +137,11 @@ class ll1_parser(object):
                 print_str = '{:<}:'.format(tag)
                 if values != None and len(values) >= 1:
                     for value in values: # print value
-                        print_str += self.print_tree(value, i+1)
+                        print_str +=  self.print_tree(value, i+1)
                 else: # value is not a list of values, 
                     print_str += '{:<}'.format(values)
             else:
                 print_str += '{:<}'.format(root)
             # green tree
             return '\n\033[32m' +tab + print_str # show tag and values
-        return '\033[32m ' + self.table.EPSILON # null
+        return '\033[32m EPSILON' 

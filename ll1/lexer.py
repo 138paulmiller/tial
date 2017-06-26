@@ -6,30 +6,34 @@ AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
 THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ''' 
 
-# ASIL lexer
-# This is a basic lexer implementation. All tokens are defined as tuples (tag, lexeme)
-# input
-#     token_exprs ::= (match, tag)
-#           match ::= regular expression string (regex match) 
-#           tag   ::= categorical identifier defined by lexer 
-#     token       ::= (lexeme, tag)
-#          lexeme ::= string representation of the token 
-#          tag    ::= categorical identifier defined by lexer
-# The regular expression, tag pairings are then tokenized by eat.py module.
+'''
+lexer
+ Tokenizes input string into tokens(tag, lexeme). With each string literal 
+ is paired with a definition
+ Each tag is paired with a regular expression, and the corresponding
+   lexeme is the matched string from input string
+ input
+     token_definitions ::= (regex, tag)
+           regex ::= regular expression string  
+           tag   ::= categorical identifier defined by lexer 
+     token       ::= (lexeme, tag)
+          lexeme ::= string representation of the token 
+          tag    ::= categorical identifier defined by lexer
+'''
 import re
-import log
+from ll1 import log
 # lex 
 # input ::= raw source code 
 # returns token list
 # where lexeme is string representation 
 # A token is a tuple (tag, lexeme) 
-def lex(input, token_exprs):
-    tokens = [] # list of tokens where a token = (lexeme, tag)
+def lex(input, token_definitions):
+    tokens = []
     i = 0
     while i < len(input):
         regex_match = None # regex match object
 
-        for token_expr in token_exprs: ## iterate through each token expressions
+        for token_expr in token_definitions: ## iterate through each token definition
 
             regex_pattern, token_tag = token_expr # get the pattern aqnd tag of token expression
             regex_obj = re.compile(regex_pattern) # compile match obj

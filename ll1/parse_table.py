@@ -79,13 +79,12 @@ from ll1 import log
 
 class ll1_parse_table(dict): 
     # Inherits dict to allow access to rule for table[nonterminal][terminal]
-
-    def __init__(self, grammer, start_sym, epsilon_sym, eoi_sym):
+    def __init__(self, grammer, start_sym, epsilon_sym):
         self.grammer = grammer
         #predefined parsing symbols each self.grammer must use
         self.START = start_sym
         self.EPSILON = epsilon_sym
-        self.EOI = eoi_sym# end of input
+        self.EOI = 'EOI'# default end of input symbol
         self.construct()
     
 
@@ -109,9 +108,9 @@ class ll1_parse_table(dict):
             # find first and follow set
             firsts = self.first_set(symbol)
             follows = self.follow_set(symbol)            
-            log.debug('SYMBOL: ' + str(symbol))
-            log.debug('\tFirst_Set:' + str(firsts))
-            log.debug('\tFollow_Set:' + str(follows))
+            log.debug('SYMBOL: ' + str(symbol)
+                +'\n\tFirst_Set:' + str(firsts)
+                +'\tFollow_Set:' + str(follows))
             for first in firsts:
                 # add rule whose first matches first of rule
                 for rule in self.grammer[symbol]: # for each rule in symbols rule list
@@ -124,7 +123,7 @@ class ll1_parse_table(dict):
                             else:
                                 self[symbol][first] = rule
                         else:
-                            log.error('Parse Table Error: Duplicate Rules for ' + symbol + ',' + first)
+                            log.error('TABLE: Duplicate Rules for ' + symbol + ',' + first)
 
     # returns list of possible symbols that are the first symbol in the rule
     def first_set(self, symbol):
