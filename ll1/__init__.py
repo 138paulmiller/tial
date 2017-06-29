@@ -25,3 +25,7 @@ def ll1_init(grammar, start_sym, epsilon_sym, token_definitions):
 	return parser.ll1_parser(token_definitions, table) # create ll1 parser from token_definitions ll1 table
 
 
+def load_grammer(filename):
+	# 
+	return 0
+

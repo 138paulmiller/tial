@@ -33,7 +33,7 @@ END = 'END'
 WHILE = 'WHILE'
 ID = 'ID'
 STR = 'STR'
-TERMINATOR = 'TERMINATOR'
+SEMICOLON = 'SEMICOLON'
 
 # definitions - corresponds each token terminal with a regex match
 #                       (expression, terminal tag)
@@ -58,7 +58,7 @@ definitions = [
       (r'else', ELSE),
       (r'end', END),
       (r'while', WHILE),
-      (r';', TERMINATOR),
+      (r';', SEMICOLON),
       (r'[a-zA-Z_][a-zA-Z0-9_]*', ID),
       (r'\"[a-zA-Z0-9_ ]+\"', STR),
       (r'[ \t\n]+', None), #whitepsace
@@ -71,7 +71,7 @@ definitions = [
 rule_map = {
             START    : [[STMT]],
 
-            STMT     : [[ID, ASSIGN, EXPR]],
+            STMT     : [[ID, ASSIGN, EXPR, SEMICOLON]],
           
             EXPR     : [[TERM, EXPR_OP]],
             

@@ -3,4 +3,4 @@
 # 	github.com/138paulmiller/tial
 #	Usage - patl [source_file] 
 #		No argument defaults to interpret standard input deliminated by newlines
-python interpreter.py 
+python main.py $@

@@ -23,11 +23,6 @@ class ll1_parser(object):
         self.validate(tokens)
         # begin by parsing the start token
         root = self.parse_token([self.table.START, None], tokens)
-        log.write('PARSED TREE:')
-        if root:
-            print self.print_tree(root)
-        else:
-            print root
         return root
 
     '''
@@ -121,8 +116,11 @@ class ll1_parser(object):
 
         return valid
 
+    
+    def print_tree(self, root):
+        print self.print_tree_str(root)
 
-    def print_tree(self, root, i=0):
+    def print_tree_str(self, root, i=0):
         print_str = ''
         tab = ''
         j = 0
@@ -137,7 +135,7 @@ class ll1_parser(object):
                 print_str = '{:<}:'.format(tag)
                 if values != None and len(values) >= 1:
                     for value in values: # print value
-                        print_str +=  self.print_tree(value, i+1)
+                        print_str +=  self.print_tree_str(value, i+1)
                 else: # value is not a list of values, 
                     print_str += '{:<}'.format(values)
             else:
@@ -145,3 +143,4 @@ class ll1_parser(object):
             # green tree
             return '\n\033[32m' +tab + print_str # show tag and values
         return '\033[32m EPSILON' 
+
