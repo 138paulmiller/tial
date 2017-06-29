@@ -1,8 +1,11 @@
+from grammar import *
+
+
 START = 'START' # necessary symbol tags
 EPSILON = 'EPSILON'
 
-
 # nonterminal symbol tags. Symbols taht are mapped to production rules in grammer
+BODY = 'BODY'
 STMT   = 'STMT' # single execution line
 EXPR = 'EXPR' # expressions grouped with adders
 EXPR_OP = 'EXPR_OP'# operation with expression
@@ -38,7 +41,7 @@ SEMICOLON = 'SEMICOLON'
 # definitions - corresponds each token terminal with a regex match
 #                       (expression, terminal tag)
 definitions = [
-      (r'[0-9]*\.?[0-9]+', NUM),
+      (r'-?[0-9]*\.?[0-9]+', NUM),
       (r'and', AND),
       (r'or', OR),
       (r'not', NOT),
@@ -69,8 +72,10 @@ definitions = [
 # Grammar consists of a nonterminal to rule list mapping:
 #      Each nonterminal is map to a list of rules where a rule is an inorder list of symbols
 rule_map = {
-            START    : [[STMT]],
+            START    : [[BODY]],
 
+            BODY     : [[STMT, BODY],
+                        [EPSILON]],
             STMT     : [[ID, ASSIGN, EXPR, SEMICOLON]],
           
             EXPR     : [[TERM, EXPR_OP]],

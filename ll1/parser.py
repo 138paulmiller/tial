@@ -42,29 +42,29 @@ class ll1_parser(object):
         if len(tokens) <= 0: return root # done, no tokens
         # tokens[0] is next token with its symbol tag tokens[0][0]  and its value at tokens[0][1] 
         if root != None: 
-            if root[0] == tokens[0][0]: # roots tag matches token tag, generated a match to terminal
-                root[1] = tokens[0][1] # assign value
-                tokens.pop(0)
-            elif root[0] in self.table and tokens[0][0]  in self.table[root[0]]: # if root is nonterminal and current token has rules with nonterminal 
+            root_tag = root[0]
+            root_value = root[1]
+            next_token = tokens[0]
+            next_tag = next_token[0]
+            next_value = next_token[1]  
+            if root_tag == next_tag: # roots tag matches token tag, generated a match to terminal
+                tokens.pop(0) # move to the next token 
+                return next_token# return matched token token value
+            elif root_tag in self.table and next_tag in self.table[root[0]]: # if root is nonterminal and current token has rules with nonterminal 
                 value = []
-                if self.table[root[0]][tokens[0][0]] == None: # no production rule in table from root symbol to next token 
-                    log.error('ERROR: No Rule for ROOT:' + str(root[0]))
+                if self.table[root_tag][next_tag] == None: # no production rule in table from root symbol to next token 
+                    log.error('ERROR: No Rule for ROOT:' + str(root_tag))
                     return None
                 # else, for each symbol in rule 
-
-                for rule_symbol in self.table[root[0]][tokens[0][0]]:
+                for rule_tag in self.table[root_tag][next_tag]:
                     # parse the remaining tokens for the rule
-                    if rule_symbol != self.table.EPSILON:
+                    if rule_tag != self.table.EPSILON:
                         # if not epsilon, attempt to parse the remaining tokens for the given symbol in the rule
-                        rule_token = self.parse_token([rule_symbol, None], tokens)
+                        rule_token = self.parse_token([rule_tag, None], tokens)
                         # if rule token parsed is valid and is a token pair(tag, value)
                         if rule_token != None and len(rule_token) > 1:
-                            # if the parsed token tag matches rule tag
-                            if rule_token[1] != None and rule_token[0] == rule_symbol: 
-                                value.append(rule_token)
-                            else: # could not parse a value for rule_token
-                                log.error('ERROR: Parsing ' + root[0] + ' for Rule: ' + str(rule_symbol) + ' RETURNED None')
-                                return None    
+                            # if the parsed token tag matches rule tag     
+                            value.append(rule_token)  
                         else: # else, rule_symbol could not be parsed
                             log.error('Could not parse RULE:' + str(rule_symbol) + '\n\tTOKENS: ' + str( tokens))
                             return None
@@ -78,7 +78,7 @@ class ll1_parser(object):
     # until all symbols, terminal, are are matched
     def validate(self, tokens):
         # nonterminal tokens contain null values 
-        token_stack = [(self.table.EOI, None), (self.table.START, None)] # push eoi and start on stack
+        token_stack = [(self.table.START, None)] # push eoi and start on stack
         index = 0 # current token index
         valid = True
         # token stack contains currently parsed
@@ -128,18 +128,17 @@ class ll1_parser(object):
             tab += '   '
             j+=1
         if root != None :
-            value = None
-            if len(root) > 1: 
-                tag = root[0]
-                values = root[1]
+            tag = root[0]
+            value_list = root[1]
+            if tag in self.table: # nonterminal, recursively print
                 print_str = '{:<}:'.format(tag)
-                if values != None and len(values) >= 1:
-                    for value in values: # print value
+                if value_list != None:
+                    for value in value_list: # print value
                         print_str +=  self.print_tree_str(value, i+1)
                 else: # value is not a list of values, 
-                    print_str += '{:<}'.format(values)
+                    print_str += '{:<}'.format(value_list)
             else:
-                print_str += '{:<}'.format(root)
+                print_str = tag + ' ' + str(value_list)
             # green tree
             return '\n\033[32m' +tab + print_str # show tag and values
         return '\033[32m EPSILON' 
