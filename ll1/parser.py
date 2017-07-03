@@ -88,7 +88,7 @@ class ll1_parser(object):
                 # take action by calling current token's action function
                 token_stack.pop()
                 index += 1            
-            # get rule to do given symbol and token tag (token[1])
+            # get rule to do given symbol and token tag (token[0])
             elif tokens[index ][0] in self.table[top_token[0]]: # if theres a rule for symbol(nonterminal)
                 # copy rule, as to not affect table's rule when popping rule symbols
                 rule = [] # rule symbol list
@@ -110,7 +110,7 @@ class ll1_parser(object):
         if valid:
             log.debug('VALIDATION: SUCCESS')
         else:
-            log.error('VALIDATION: FAILED, No RULE in TABLE[next_token][top_token]')
+            log.error('VALIDATION: FAILED, No RULE in TABLE[top_token][next_token]')
             log.error('TOKEN STACK: ' + str(token_stack))
             log.error('NEXT TOKENS: ' + str(tokens[index:-1]) + '\n')
 

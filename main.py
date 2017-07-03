@@ -8,26 +8,63 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ''' 
 import sys
 import grammar # Symbols, definitions and grammar 
-import actions
-from cli import *
+import evaluator
+import session
 from ll1 import ll1_init #Inits LL(1) parser 
+DEBUG = False
+# Defines what function will process each tag
+# The eval map is used by the context to allow the user to define a function how to evaluate at each given 
+# step by just using the contexts eval that will map it to the function   
+evaluation_map = {
+            grammar.START   : evaluator.eval_start,
+            grammar.FUNC_DEF : evaluator.eval_func_def,
+            grammar.FUNC_CALL : evaluator.eval_func_call,
+            grammar.ID_LIST  : evaluator.eval_id_list,
+            grammar.ARGS  : evaluator.eval_args,
+            grammar.BODY    : evaluator.eval_body,
+            grammar.STMT    : evaluator.eval_stmt,
+            grammar.EXPR    : evaluator.eval_expr,
+            grammar.EXPR_LIST  : evaluator.eval_expr_list,
+            grammar.EXPR_OP : evaluator.eval_expr_op, 
+            grammar.TERM    : evaluator.eval_term,
+            grammar.TERM_OP : evaluator.eval_term_op,
+            grammar.FACTOR  : evaluator.eval_factor
+            }
 
+
+def interpret(parser, context, code, debug=False):
+    root =  parser.parse(code)
+    if debug:
+        parser.print_tree(root)
+    context.eval(root, context)
+    if debug:
+        context.print_vars()
+    return context
+
+
+def interpret_source_file(parser, context, file_path,  debug=False):
+    source = open(file_path)
+    code = source.read()
+    print code[:-1]
+    return interpret(parser, context, code)
 
 
 def main():
     # create root context for session
     ll1_parser = ll1_init(grammar.rule_map, grammar.START, grammar.EPSILON, grammar.definitions)
-    root_context = context.context(actions.eval_map)
+    context = session.context(evaluation_map)
     argc = len(sys.argv)
     if argc == 1:  # if only script is called, use as realtime parsing interpter
         input = raw_input('>')
         while input != 'quit': # while quit command is not entered    
-            interpret(ll1_parser, root_context, input)
+            context = interpret(ll1_parser, context, input, DEBUG)
             input = raw_input(">")
     elif argc == 2:  # interpret file
-        interpret_source_file(ll1_parser, root_context, sys.argv[1])
+        context = interpret_source_file(ll1_parser, context, sys.argv[1], DEBUG)
+    print 'SESSION CONTEXT:'
+    context.print_vars()
 
-
+    raw_input('...')
 if __name__ == "__main__":
     main()
 

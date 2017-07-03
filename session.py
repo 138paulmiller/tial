@@ -36,6 +36,6 @@ class context:
 
 	def print_vars(self):
 		for var in self.var_map.keys():
-			print var, '=', self.var_map[var]
-
+			print var, '\t:=', self.var_map[var]
+		
 
