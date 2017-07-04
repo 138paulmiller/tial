@@ -27,81 +27,54 @@ def eval_start(value_list, context):
 
 def eval_func_def(value_list, context):
 	'''
-	FUNC_DEF : [  DEF, ID, L_PAREN, ID, ID_LIST, R_PAREN, BODY, END] 
-				0	   1	  2		3	  4         5     6
+	FUNC_DEF : [  DEF, ID, L_PAREN, ARGS, R_PAREN, BODY, RETURN, ARGS, SEMICOLON] 
+				0	   1	  2		3	  4         5     6       7       8
 	'''
 	# create a new function object with the id, args, and body
 	# and add it to the context. Do not evaluate it yet. Only on func call
 	func_id = value_list[1][1]
-	args = []
-	args.append(value_list[3][1])
-	 
-	eval_args = context.eval(value_list[4], context)
-	for arg in eval_args:
-		args.append(arg)
-
-	raw_input('ARGS:'+str( args))
-	body = value_list[6]
-	func_value = adt.func(func_id, args, body)
+	args = context.eval(value_list[3], context)
+	# every expression argument must be evaluated to an id, NOT a number
+	for arg in args:
+		try:
+			float(arg)
+			print 'eval_func_def :', func_id, 'ERROR defining! All parameter arguments must be identifiers! Non-numbers'
+			return None
+		except ValueError: # if exception thrown than non number
+			continue
+	body = value_list[5]
+	
+	return_args = context.eval(value_list[7], context)
+	raw_input('ARGS:'+str( return_args))
+	func_value = adt.func(func_id, args, body, return_args)
 	context.set_var(func_id, func_value)
 	return context
 
 
-
-
 def eval_func_call(value_list, context):
 	'''
-	FUNC_CALL : [L_PAREN, ARGS, R_PAREN],
+		 FUNC_CALL : L_PAREN,  ARGS, R_PAREN], 
+	                        [EPSILON
+	'''
+	if value_list[0] != None:
+		return context.eval(value_list[1], context) # return arg list
+
+def eval_args(value_list, context):
+	'''
+	ARGS : [EXPR, EXPR_LIST],
                         [EPSILON]
     '''
 	if value_list[0] != None:
-		
-		value =  context.eval(value_list[1], context) # eval args
-		print 'func call:', value
-		return value
-	return None
-
-def eval_args(value_list, context):
-	''''
-		ARGS : [EXPR, EXPR_LIST]
-			| [ EPSILON]
-			
-	'''
-	if value_list[0] != grammar.EPSILON:
 		args = []
-		args.append(context.eval(value_list[0], context))
-		raw_input(args)
+		arg = context.eval(value_list[0], context)
+		args.append(arg) 
 		eval_args = context.eval(value_list[1], context)
-		# evaluates if id list to users id_list func in action
-		if eval_args != None:
+		if eval_args != None: # not epsilon	
 			for arg in eval_args:
-				args.append(arg)
-			return args
-		else: # single arg
-			return args[0]
+				args.append(arg)	
+		return args
 	return None
 
-def eval_id_list(value_list, context):
-	'''
-		EXPR_LIST : [COMMA, ID, ID_LIST]
-				| [EPSILON]
-	'''
-	value = None
-	# accumulate ids into 1D list
-	if value_list[0] != None: # not epsilon
-		id_list = []
-		value = value_list[1][1]
-		# if the second id_list is not epsilon then accumulate ids
-		print value_list[1]
-		id_list.append(value_list[1])
-		eval_id = context.eval(value_list[2], context)
-		if eval_id != None:
-			for eval_id in eval_list:
-				id_list.append(eval_id)
-			return id_list # returns values as a list
-		# else if only single vale return as single item not a list
-		return value
-	return None
 
 
 def eval_expr_list(value_list, context):
@@ -112,15 +85,14 @@ def eval_expr_list(value_list, context):
 	value = None
 	# accumulate ids into 1D list
 	if value_list[0] != None: # not epsilon
-		value = value_list[1][1]
+		value = []
+		value.append( context.eval(value_list[1], context))
 		# if the second id_list is not epsilon then accumulate ids
-		eval_values = []
-		eval_values.append(value)
 		expr_list = context.eval(value_list[2], context)
 		if expr_list != None: # if not epsilon
 			for expr in expr_list:
-				eval_values.append(expr)
-			return eval_values # returns values as a list
+				value.append(expr)
+		
 		# else if only single vale return as single item not a list
 	return 	value
 
@@ -140,21 +112,19 @@ def eval_body(value_list, context):
 			# evaluate stmt
 			stmt_value =context.eval(value_list[1], context)
 	
-	
 	return context
 
 
 
 def eval_stmt(value_list, context):
 	'''
-	STMT:	[LET, ID, ASSIGN, EXPR, SEMICOLON]
-			 0    1   2       3       4
+	STMT:	[ID, ASSIGN, EXPR, SEMICOLON]
+			 0    1      2       3       
 	'''		
 	value = None
-	if len(value_list) == 5: #if four values, eval assignment
-		var = value_list[1] 
-		assign_tag = value_list[2]
-		value = context.eval(value_list[3], context) # eval expr, third value in list
+	if len(value_list) == 4: #if four values, eval assignment
+		var = value_list[0] 
+		value = context.eval(value_list[2], context) # eval expr, third value in list
 		context.set_var(var[1], value) 
 		
 
@@ -243,10 +213,38 @@ def eval_factor(value_list, context):
 		value = float(factor[1])
 	elif factor[0] == grammar.ID:
 		args = context.eval(value_list[1], context)
-		if args:
-			raw_input('FUNCTION CALL!')
+		print 'FUNC CALL ', factor[1], 'WITH ', args
+		value = context.get_var(factor[1]) # get var from context or its parent contexts
+		if value == None:
+			return factor[1] # eval the id, not the value
 		else:
-			value = context.get_var(factor[1]) # get var from context or its parent contexts
+			# if function
+			func_value = value
+			if args != None: # create a new context. that is a child of current
+				# Add func arg_ids to context with arg values. Must same size!!
+				if len(args) == len(func_value.arg_ids):
+					func_context = session.context(context.evaluation_map, context)
+					i = 0
+					while i < len(args):
+						func_context.set_var(func_value.arg_ids[i], args[i])
+						i+=1
+					# evaluate function body
+					func_context =  func_context.eval(func_value.body, func_context)
+					func_context.print_vars()
+					# evaluate the functions return from func context
+					value = []
+					for arg in func_value.return_args:
+						eval_value = func_context.get_var(arg)
+						if eval_value != None:
+							value.append(eval_value)
+						else:
+							value.append(arg)
+					if len(value) == 1:
+						value = value[0] # return first value as non list
+				else:
+					print 'eval_factor ERROR: Function call expects ', len(value.arg_ids) ,' arguments!' 
+					value = None
+
 	elif factor[0] == grammar.L_PAREN:
 		value = context.eval(value_list[1], context) # eval expr, 2nd value in list
 	return value

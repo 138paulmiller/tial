@@ -37,9 +37,8 @@ L_PAREN = 'L_PAREN'
 R_PAREN = 'R_PAREN'
 IF = 'IF'
 ELSE = 'ELSE'
-END = 'END'
+RETURN = 'RETURN'
 DEF = 'DEF'
-LET = 'LET'
 WHILE = 'WHILE'
 ID = 'ID'
 STR = 'STR'
@@ -66,10 +65,9 @@ definitions = [
       (r'/', DIV),
       (r'if', IF),
       (r'else', ELSE),
-      (r'end', END),
+      (r'return', RETURN),
       (r'while', WHILE),
       (r'def', DEF),
-      (r'let', LET),
       (r';', SEMICOLON),
       (r',', COMMA),
       (r'[a-zA-Z_][a-zA-Z0-9_]*', ID),
@@ -85,20 +83,16 @@ definitions = [
 rule_map = {
             START    : [[BODY]],
 
-            FUNC_DEF   : [[ DEF, ID, L_PAREN, ID, ID_LIST, R_PAREN, BODY, END ]],
-
-
-            ARGS        :  [[  EXPR, EXPR_LIST],
-                              [EPSILON]],
-                              
-            ID_LIST :   [[ COMMA, ID, ID_LIST],
-                        [EPSILON]],
-
             BODY     : [[STMT, BODY],
                         [FUNC_DEF, BODY],
                         [EPSILON]],
 
-            STMT     : [[LET, ID, ASSIGN, EXPR, SEMICOLON]],
+            FUNC_DEF   : [[ DEF, ID, L_PAREN,  ARGS, R_PAREN,  BODY, RETURN, ARGS, SEMICOLON]],
+
+            STMT     : [[ID, ASSIGN, EXPR, SEMICOLON]],
+          
+            ARGS     : [[EXPR, EXPR_LIST],
+                         [EPSILON]],
           
             EXPR     : [[TERM, EXPR_OP]],
             
@@ -117,9 +111,8 @@ rule_map = {
 
             FACTOR   : [[NUM],
                         [ID, FUNC_CALL],
-                        [ L_PAREN, EXPR, R_PAREN]],
-                         
-            FUNC_CALL  : [[L_PAREN, ARGS, R_PAREN],
-                        [EPSILON]]
+                        [ L_PAREN, EXPR, R_PAREN]] ,
 
+            FUNC_CALL  : [[ L_PAREN,  ARGS, R_PAREN], 
+                        [EPSILON]]
             }

@@ -11,12 +11,13 @@ class object:
 
 
 class func(object):
-	def __init__(self, id, arg_ids, body):
+	def __init__(self, id, arg_ids, body, return_args):
 		object.__init__(self, 'func(')
 		self.id = id
 		self.arg_ids = arg_ids #variables to add to var map argumen
 		self.body = body # new body new context, push new context than add vars
-
+		self.return_args = return_args
+		
 	def __repr__(self):
 		repr_str = 'func('
 		i = 0

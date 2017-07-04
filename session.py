@@ -1,10 +1,10 @@
 # defines a variable and function definition scopes
 # Variable declarations will be hierarchal where each body generates a context.
 class context:
-	def __init__(self, evaluation_map):
+	def __init__(self, evaluation_map, parent=None):
 		self.var_map = {}
 		self.evaluation_map = evaluation_map
-		self.parent = None
+		self.parent = parent
 
 
 	'''evaluate

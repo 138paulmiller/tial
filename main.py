@@ -19,7 +19,6 @@ evaluation_map = {
             grammar.START   : evaluator.eval_start,
             grammar.FUNC_DEF : evaluator.eval_func_def,
             grammar.FUNC_CALL : evaluator.eval_func_call,
-            grammar.ID_LIST  : evaluator.eval_id_list,
             grammar.ARGS  : evaluator.eval_args,
             grammar.BODY    : evaluator.eval_body,
             grammar.STMT    : evaluator.eval_stmt,
