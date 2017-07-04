@@ -37,5 +37,8 @@ class context:
 	def print_vars(self):
 		for var in self.var_map.keys():
 			print var, '\t:=', self.var_map[var]
+		if self.parent != None:
+			print 'PARENT:'
+			self.parent.print_vars()
 		
 

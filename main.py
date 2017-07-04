@@ -57,13 +57,15 @@ def main():
         input = raw_input('>')
         while input != 'quit': # while quit command is not entered    
             context = interpret(ll1_parser, context, input, DEBUG)
+            print 'SESSION CONTEXT:'
+            context.print_vars()
             input = raw_input(">")
+            
     elif argc == 2:  # interpret file
         context = interpret_source_file(ll1_parser, context, sys.argv[1], DEBUG)
-    print 'SESSION CONTEXT:'
-    context.print_vars()
-
-    raw_input('...')
+        print 'SESSION CONTEXT:'
+        context.print_vars()
+        
 if __name__ == "__main__":
     main()
 

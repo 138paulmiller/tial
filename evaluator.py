@@ -35,17 +35,16 @@ def eval_func_def(value_list, context):
 	func_id = value_list[1][1]
 	args = context.eval(value_list[3], context)
 	# every expression argument must be evaluated to an id, NOT a number
-	for arg in args:
-		try:
-			float(arg)
-			print 'eval_func_def :', func_id, 'ERROR defining! All parameter arguments must be identifiers! Non-numbers'
-			return None
-		except ValueError: # if exception thrown than non number
-			continue
-	body = value_list[5]
-	
+	if args != None:
+		for arg in args:
+			try:
+				float(arg)
+				print 'eval_func_def :', func_id, 'ERROR defining! All parameter arguments must be identifiers! Non-numbers'
+				return None
+			except ValueError: # if exception thrown than non number
+				continue
+	body = value_list[5]	
 	return_args = value_list[7]
-	raw_input('ARGS:'+str( return_args))
 	func_value = adt.func(func_id, args, body, return_args)
 	context.set_var(func_id, func_value)
 	return context
@@ -57,7 +56,8 @@ def eval_func_call(value_list, context):
 	                        [EPSILON
 	'''
 	if value_list[0] != None:
-		return context.eval(value_list[1], context) # return arg list
+		return value_list[1] # return args
+	return None # else return none, indicating no call
 
 def eval_args(value_list, context):
 	'''
@@ -212,31 +212,31 @@ def eval_factor(value_list, context):
 	if factor[0] == grammar.NUM:
 		value = float(factor[1])
 	elif factor[0] == grammar.ID:
-		args = context.eval(value_list[1], context)
+		func_call = context.eval(value_list[1], context)
 		value = context.get_var(factor[1]) # get var from context or its parent contexts
 		if value == None:
 			return factor[1] # eval the id, not the value
-		elif args != None:
-			# if function
+		elif func_call != None:
+			# is a function
 			func_value = value
+			args = context.eval(func_call, context) # get evalled args
+			func_context = session.context(context.evaluation_map, context)
 			if args != None: # create a new context. that is a child of current
 				# Add func arg_ids to context with arg values. Must same size!!
-				if len(args) == len(func_value.arg_ids):
-					func_context = session.context(context.evaluation_map, context)
+				if len(args) != len(func_value.arg_ids):
+					print 'eval_factor ERROR: Function call expects ', len(value.arg_ids) ,' arguments!' 
+					return None		
+				else:
 					i = 0
 					while i < len(args):
 						func_context.set_var(func_value.arg_ids[i], args[i])
 						i+=1
-					# evaluate function body
-					func_context =  func_context.eval(func_value.body, func_context)
-					# evaluate the functions return from func context
-					value = func_context.eval(func_value.return_args, func_context)
-					if len(value) == 1:
-						value = value[0] # return first value as non list
-					raw_input('value:' +str( value))
-				else:
-					print 'eval_factor ERROR: Function call expects ', len(value.arg_ids) ,' arguments!' 
-					value = None
+			# evaluate function body
+			func_context =  func_context.eval(func_value.body, func_context)
+			# evaluate the functions return from func context
+			value = func_context.eval(func_value.return_args, func_context)
+			if len(value) == 1:
+				value = value[0] # return first value as non list
 
 	elif factor[0] == grammar.L_PAREN:
 		value = context.eval(value_list[1], context) # eval expr, 2nd value in list

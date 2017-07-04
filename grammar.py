@@ -73,7 +73,7 @@ definitions = [
       (r'[a-zA-Z_][a-zA-Z0-9_]*', ID),
       (r'\"[a-zA-Z0-9_ ]+\"', STR),
       (r'[ \t\n]+', None), #whitespace, use none to ignore tokens
-      (r'#\w+[^\n]+', None) # comments
+      (r'#[ \t\w]+[^\n]+', None) # comments
       ] #comments, # everything but newline
 
 

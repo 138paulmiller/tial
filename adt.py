@@ -21,12 +21,13 @@ class func(object):
 	def __repr__(self):
 		repr_str = 'func('
 		i = 0
-		last = len(self.arg_ids)-1
-		while i <= last:
-			repr_str += str(self.arg_ids[i])
-			if i != last:
-				repr_str += ', ' 
-			i+=1
+		if self.arg_ids != None:
+			last = len(self.arg_ids)-1
+			while i <= last:
+				repr_str += str(self.arg_ids[i])
+				if i != last:
+					repr_str += ', ' 
+				i+=1
 		repr_str += ')'
 		return repr_str
 

@@ -1,9 +1,16 @@
-g = 10;
+g = 10; # global
 
 def foo(a , b, c)
-	g = a + b + c;
-	return g;
+	l = a + b + c ; #local sum 
+	return l-g;
+
+def sqr(a)
+	return a * a;
 
 
-q = foo(1, 2,3);
-a = foo(2,3,4);
+def num()
+	return 1 + 100 * (3 + (-4)+4)*8;
+
+q = foo(5, 10, 5);
+a = sqr(9);
+b = num(); 
