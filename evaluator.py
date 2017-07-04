@@ -44,7 +44,7 @@ def eval_func_def(value_list, context):
 			continue
 	body = value_list[5]
 	
-	return_args = context.eval(value_list[7], context)
+	return_args = value_list[7]
 	raw_input('ARGS:'+str( return_args))
 	func_value = adt.func(func_id, args, body, return_args)
 	context.set_var(func_id, func_value)
@@ -213,11 +213,10 @@ def eval_factor(value_list, context):
 		value = float(factor[1])
 	elif factor[0] == grammar.ID:
 		args = context.eval(value_list[1], context)
-		print 'FUNC CALL ', factor[1], 'WITH ', args
 		value = context.get_var(factor[1]) # get var from context or its parent contexts
 		if value == None:
 			return factor[1] # eval the id, not the value
-		else:
+		elif args != None:
 			# if function
 			func_value = value
 			if args != None: # create a new context. that is a child of current
@@ -230,17 +229,11 @@ def eval_factor(value_list, context):
 						i+=1
 					# evaluate function body
 					func_context =  func_context.eval(func_value.body, func_context)
-					func_context.print_vars()
 					# evaluate the functions return from func context
-					value = []
-					for arg in func_value.return_args:
-						eval_value = func_context.get_var(arg)
-						if eval_value != None:
-							value.append(eval_value)
-						else:
-							value.append(arg)
+					value = func_context.eval(func_value.return_args, func_context)
 					if len(value) == 1:
 						value = value[0] # return first value as non list
+					raw_input('value:' +str( value))
 				else:
 					print 'eval_factor ERROR: Function call expects ', len(value.arg_ids) ,' arguments!' 
 					value = None

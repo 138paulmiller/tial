@@ -22,16 +22,16 @@ class context:
 	    return value
 
 
-	def get_var(self, id):
-		if id in self.var_map:
-			return self.var_map[id]
+	def get_var(self, var_id):
+		if var_id in self.var_map:
+			return self.var_map[var_id]
 		elif self.parent != None:
-			return self.parent.get_var(id) # find variable in any contexts above the current scope
+			return self.parent.get_var(var_id) # find variable in any contexts above the current scope
 		return None
 
 
-	def set_var(self, id, value):
-		self.var_map[id] = value
+	def set_var(self, var_id, value):
+		self.var_map[var_id] = value
 
 
 	def print_vars(self):

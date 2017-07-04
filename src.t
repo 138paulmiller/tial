@@ -1,9 +1,8 @@
 g = 10;
 
 def foo(a , b, c)
-	a = 30 + (-3*5) - (-15);
-	b = a + c;
-	return b;
+	g = a + b + c;
+	return g;
 
 
 q = foo(1, 2,3);
