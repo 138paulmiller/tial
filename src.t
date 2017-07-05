@@ -1,16 +1,19 @@
-g = 10; # global
+g = 0; # global
 
-def foo(a , b, c)
+def first(a, b, c)
 	l = a + b + c ; #local sum 
-	return l-g;
+	g = l*l;
+	return l;
 
-def sqr(a)
-	return a * a;
+def second(a)
+	g = g / a;
+	return g;
 
 
-def num()
-	return 1 + 100 * (3 + (-4)+4)*8;
+def third()
+	g = a  + 5;
+	return g;
 
-q = foo(5, 10, 5);
-a = sqr(9);
-b = num(); 
+v1 = first(1, 10, 100);
+v2 = second(v1);
+v3 = third(); 

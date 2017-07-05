@@ -31,7 +31,17 @@ class context:
 
 
 	def set_var(self, var_id, value):
-		self.var_map[var_id] = value
+		# if var does not exist yet. Try to set for parent context if exists
+		if var_id not in self.var_map:
+			# find variable in any contexts above the current scope
+			if self.parent != None and var_id in self.parent.var_map:
+				self.parent.set_var(var_id, value) 
+			else:
+				#make new
+				self.var_map[var_id] = value
+		# update existing
+		else:
+			self.var_map[var_id] = value
 
 
 	def print_vars(self):
