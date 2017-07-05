@@ -76,17 +76,17 @@ Some caveats to this grammar can be seen in the following example.
 		    }
 		    
 #### Constructing the Parser and Evaluator
-	# Where START, EPSILON are symbols used to identify start and epsilon symbols used by grammer
+	#Where START, EPSILON are symbols used to identify start and epsilon symbols used by grammer
 	ll1_parser = ll1_init(grammar, 'START', 'EPSILON', definitions)
-    	# creates a root context where evalautions will be contained
+    	#creates a root context where evalautions will be contained
 	root_context = session.context(evaluation_map)
 	
 #### Evaluating Source Code
-	# parse the string representation of source code
+	#parse the string representation of source code
 	root =  parser.parse(code) # gets root of ast
         parser.print_tree(root)
-	# evaluate the ast with repsect to root_context 
-	# the value returned is the context returned evaluation context
+	#evaluate the ast with repsect to root_context 
+	#the value returned is the context returned evaluation context
     	context =root_context.eval(root, root_context)
 	
 #### Defining Evaluator
