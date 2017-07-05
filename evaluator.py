@@ -33,9 +33,12 @@ def eval_func_def(value_list, context):
 	# create a new function object with the id, args, and body
 	# and add it to the context. Do not evaluate it yet. Only on func call
 	func_id = value_list[1][1]
-	args = context.eval(value_list[3], context)
+	func_context = session.context(context.evaluation_map) # empty context
+
+	args = func_context.eval(value_list[3], func_context) # eval args in empty context, dissallows literals !
 	# every expression argument must be evaluated to an id, NOT a number
 	if args != None:
+		print 'ARGS:', args
 		for arg in args:
 			try:
 				float(arg)
@@ -46,6 +49,7 @@ def eval_func_def(value_list, context):
 	body = value_list[5]	
 	return_args = value_list[7]
 	func_value = adt.func(func_id, args, body, return_args)
+	# set value in context where function is defined
 	context.set_var(func_id, func_value)
 	return context
 
@@ -239,8 +243,8 @@ def eval_factor(value_list, context):
 		elif func_call != None:
 			# is a function
 			func_value = value
-			args = context.eval(func_call, context) # get evalled args
-			func_context = session.context(context.evaluation_map, context)
+			args = context.eval(func_call, context) # get evalled arguments
+			func_context = session.context(context.evaluation_map, None)
 			if args != None: # create a new context. that is a child of current
 				# Add func arg_ids to context with arg values. Must same size!!
 				if len(args) != len(func_value.arg_ids):
@@ -249,12 +253,16 @@ def eval_factor(value_list, context):
 				else:
 					i = 0
 					while i < len(args):
+						# assign arg values to arg_ids
 						func_context.set_var(func_value.arg_ids[i], args[i])
 						i+=1
+			# after function arg_ids are set, then set the parent context 
+			func_context.parent = context
 			# evaluate function body
 			func_context =  func_context.eval(func_value.body, func_context)
 			# evaluate the functions return from func context
 			value = func_context.eval(func_value.return_args, func_context)
+
 			if len(value) == 1:
 				value = value[0] # return first value as non list
 

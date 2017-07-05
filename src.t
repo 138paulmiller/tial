@@ -10,10 +10,10 @@ def first(a, b, c)
  	return g;
 
 # comments !!
- def third()
+ def third(g)
  	g = g  * 2; # after line comment
  	return g / 2;
 
 v1 = first(1, 10, 100);
 v2 = second(v1);
-v3 = third(); 
+v3 = third(4); 
