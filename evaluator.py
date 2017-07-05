@@ -100,7 +100,7 @@ def eval_expr_list(value_list, context):
 
 def eval_body(value_list, context):
 	'''
-	BODY : [BODY, STMT]
+	BODY : [STMT, BODY]
 		 | [EPSILON] 
 	'''
 	# create a declaration context on start

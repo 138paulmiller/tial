@@ -44,9 +44,9 @@ ID = 'ID'
 STR = 'STR'
 COMMA = 'COMMA'
 SEMICOLON = 'SEMICOLON'
-# definitions - corresponds each token terminal with a regex match
+# lexemes - corresponds each terminal symbol with a regex match
 #                       (expression, terminal tag)
-definitions = [
+lexemes = [
       (r'-?[0-9]*\.?[0-9]+', NUM),
       (r'and', AND),
       (r'or', OR),

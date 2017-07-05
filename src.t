@@ -15,5 +15,5 @@ def first(a, b, c)
  	return g / 2;
 
 v1 = first(1, 10, 100);
- v2 = second(v1);
+v2 = second(v1);
 v3 = third(); 

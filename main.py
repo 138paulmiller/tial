@@ -35,7 +35,7 @@ def interpret(parser, context, code, debug=False):
     root =  parser.parse(code)
     if debug:
         parser.print_tree(root)
-    context.eval(root, context)
+    context = context.eval(root, context) # the start rule returns an evaluation context
     if debug:
         context.print_vars()
     return context
@@ -50,7 +50,7 @@ def interpret_source_file(parser, context, file_path,  debug=False):
 
 def main():
     # create root context for session
-    ll1_parser = ll1_init(grammar.rule_map, grammar.START, grammar.EPSILON, grammar.definitions)
+    ll1_parser = ll1_init(grammar.rule_map, grammar.START, grammar.EPSILON, grammar.lexemes)
     context = session.context(evaluation_map)
     argc = len(sys.argv)
     if argc == 1:  # if only script is called, use as realtime parsing interpter
