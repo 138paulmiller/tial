@@ -142,20 +142,14 @@ def eval_expr(value_list, context):
 	# evaluate expr_op, is nullable!
 	expr_op = context.eval(value_list[1], context)
 	if term != None and expr_op != None:
-		# by default all terms are added with each other
-		# dividing a-b is translated to a+(0-b)	
-		# add expression operations
 		try:
-			term = float(term)
+			# by default all terms are added with each other
+			# dividing a-b is translated to a+(0-b)	
+			# add expression operations
+			term +=  expr_op
 		except:
-			print 'eval_expr ERROR: term is a nonnumeric ID: ', term
-			return None
-		try:
-			term +=  float(expr_op)
-		except:
-			print 'eval_expr ERROR: expr_op is a nonnumeric ID: ', expr_op
-			return None
-
+			print 'eval_expr ERROR: Cannot Evaluate', term, ' : ', expr_op 
+			term =  None
 	return term
 
 
@@ -170,22 +164,17 @@ def eval_expr_op(value_list, context):
 		tag_token = value_list[0] # mul or div token
 		term = context.eval(value_list[1], context)
 		expr_op = context.eval(value_list[2], context)
-		if term != None and expr_op != None:
+		if term != None:
 			try:
-				term = float(term)
-			# subtraction is really just adding the negative
+				# subtraction is really adding the negative
 				if tag_token[0] == grammar.SUB:
-					term = 0 -term 
+					term = 0-term 
 				# add term to expression operation
+				if expr_op != None:
+					term += expr_op
 			except:
-				print 'eval_expr_op ERROR: term is a nonnumeric ID:', term
-				return None
-			try:			
-				term += float(expr_op)
-			except:
-				print 'eval_expr_op ERROR: expr_op is a nonnumeric ID:', expr_op
-				return None
-			
+				print 'eval_expr_op ERROR: Cannot Evaluate', term, ' : ', expr_op 
+				term = None
 	return term
 
 
@@ -200,16 +189,10 @@ def eval_term(value_list, context):
 	#if numerical
 	if factor != None and term_op != None:
 		try:
-			factor = float(factor) # not var id, but value
+			factor *= term_op
 		except:
-			print 'eval_term ERROR: factor is a nonnumeric ID: ', factor
-			return None
-		try:
-			factor *= float(term_op)
-		except:
-			print 'eval_term ERROR: term_op is a nonnumeric ID: ', term_op
-			return None
-
+			print 'eval_term ERROR: Cannot Evaluate', factor, ' : ', term_op 
+			factor =  None
 	return factor
 
 def eval_term_op(value_list, context):
@@ -226,17 +209,16 @@ def eval_term_op(value_list, context):
 		term_op = context.eval(value_list[2], context)
 		# do not change value for multiplication, by default terms_ops are multipled
 		# divisionis really adding the negative
-		if factor != None and term_op != None:
+		if factor != None:
 			try:
-				factor = float(factor) # not var id, but value
 				if tag[0] == grammar.DIV:
 					factor = 1/factor
-					# multiply factor with term operation
+				# multiply factor with term operation
 				if term_op != None:
-					factor *= term_op
-			except:	
-				print 'eval_term_op ERROR: factor is a nonnumeric ID:', factor
-				return None
+					 factor *= term_op
+			except:
+				print 'eval_term_op ERROR: Cannot Evaluate', factor, ' : ', term_op 
+				factor = None	
 	return factor
 
 def eval_factor(value_list, context):
