@@ -32,17 +32,15 @@ def lex(input, token_definitions):
     i = 0
     while i < len(input):
         regex_match = None # regex match object
-
         for token_expr in token_definitions: ## iterate through each token definition
 
-            regex_pattern, token_tag = token_expr # get the pattern aqnd tag of token expression
+            token_tag, regex_pattern = token_expr # get the pattern and tag of token expression
             regex_obj = re.compile(regex_pattern) # compile match obj
-
             # try to match one of the token expressions to the string of input starting at position i
             regex_match = regex_obj.match(input, i)
             if regex_match: # if match is not none
                 lexeme = regex_match.group(0) # grab the capture group
-                if token_tag: # if the tag is valid token, not whitespace, comments, etc
+                if token_tag != None: # if the tag is valid token, not whitespace, comments, etc
                     tokens.append((token_tag, lexeme))
                 break #found token
         # end of token expression check, check if any of the
@@ -54,8 +52,9 @@ def lex(input, token_definitions):
                   # did not advance, repeating same match, break loop
                   break 
             else:
-                  i = j 
+                  i = j
         else:
-            log.error("Lexer Error: Invalid symbol" + input[i])
+            log.error("Lexer Error: Invalid symbol: " + input[i])
+            raw_input('...')
             break
     return tokens

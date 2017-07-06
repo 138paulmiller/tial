@@ -38,7 +38,6 @@ def eval_func_def(value_list, context):
 	args = func_context.eval(value_list[3], func_context) # eval args in empty context, dissallows literals !
 	# every expression argument must be evaluated to an id, NOT a number
 	if args != None:
-		print 'ARGS:', args
 		for arg in args:
 			try:
 				float(arg)
@@ -131,8 +130,6 @@ def eval_stmt(value_list, context):
 		var = value_list[0] 
 		value = context.eval(value_list[2], context) # eval expr, third value in list
 		context.set_var(var[1], value) 
-		
-
 	return value
 
 
@@ -216,7 +213,7 @@ def eval_term_op(value_list, context):
 		if factor != None:
 			try:
 				if tag[0] == grammar.DIV:
-					factor = 1/factor
+					factor = 1.0/factor
 				# multiply factor with term operation
 				if term_op != None:
 					 factor *= term_op

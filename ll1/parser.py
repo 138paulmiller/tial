@@ -109,6 +109,7 @@ class ll1_parser(object):
         # end parse loop
         if valid:
             log.debug('VALIDATION: SUCCESS')
+            print token_stack
         else:
             log.error('VALIDATION: FAILED, No RULE in TABLE[top_token][next_token]')
             log.error('TOKEN STACK: ' + str(token_stack))

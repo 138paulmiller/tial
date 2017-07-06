@@ -7,11 +7,11 @@ AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
 THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ''' 
 import sys
-import grammar # Symbols, definitions and grammar 
+import grammar # Symbols tags
 import evaluator
 import session
-from ll1 import ll1_init #Inits LL(1) parser 
-DEBUG = False
+from ll1 import * # LL(1) parser 
+DEBUG = True
 # Defines what function will process each tag
 # The eval map is used by the context to allow the user to define a function how to evaluate at each given 
 # step by just using the contexts eval that will map it to the function   
@@ -49,8 +49,9 @@ def interpret_source_file(parser, context, file_path,  debug=False):
 
 
 def main():
+    ll1_parser = ll1_load_grammar('grammar.ll1',grammar.START, grammar.EPSILON)
     # create root context for session
-    ll1_parser = ll1_init(grammar.rule_map, grammar.START, grammar.EPSILON, grammar.lexemes)
+    #ll1_parser = ll1_init(grammar.rule_map, grammar.START, grammar.EPSILON, grammar.lexemes)
     context = session.context(evaluation_map)
     argc = len(sys.argv)
     if argc == 1:  # if only script is called, use as realtime parsing interpter

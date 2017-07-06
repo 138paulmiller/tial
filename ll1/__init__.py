@@ -25,7 +25,41 @@ def ll1_init(grammar, start_sym, epsilon_sym, token_definitions):
 	return parser.ll1_parser(token_definitions, table) # create ll1 parser from token_definitions ll1 table
 
 
-def load_grammer(filename):
+def ll1_load_grammar(grammar_filename, start_sym, epsilon_sym):
 	# 
-	return 0
+	lexemes = []
+	rule_map = {}
+	file = open(grammar_filename)
+	if file != None:
+		i = 0
+		lines = file.read().split('$') # split each production rule seperated by $
+		for line in lines:
+			pair = line.split(':=') # split symbol and rule
+			if len(pair) == 2:
+				symbol = pair[0].strip()
+				rule_list = [] 
+			 	has_rule = True
+			   	for rules in pair[1].split('|'):
+			  		rule = []
+			  		rules = rules.strip()
+			  		if rules[0] == '\'': # parse terminal regex
+			 			definition = rules.split('\'')
+			 			if len(definition) == 3: # regex literal must be wrapped by single quote
+							if symbol.lower().strip() == 'none':
+								symbol = None
+							lexemes.append((symbol, str(definition[1])))
+							has_rule = False
+					else:
+						for rule_symbol in rules.split(' '):
+							if rule_symbol != '':
+								rule.append(rule_symbol)
+						rule_list.append(rule)
+				if has_rule:
+					rule_map[symbol] = rule_list
+	else:
+		print "Could not open Grammar File ", grammar_filename 
+		return None
+
+	return  ll1_init(rule_map, start_sym, epsilon_sym, lexemes)
+    
 

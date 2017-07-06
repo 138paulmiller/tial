@@ -108,9 +108,6 @@ class ll1_parse_table(dict):
             # find first and follow set
             firsts = self.first_set(symbol)
             follows = self.follow_set(symbol)            
-            log.debug('SYMBOL: ' + str(symbol)
-                +'\n\tFirst_Set:' + str(firsts)
-                +'\tFollow_Set:' + str(follows))
             for first in firsts:
                 # add rule whose first matches first of rule
                 for rule in self.grammer[symbol]: # for each rule in symbols rule list
