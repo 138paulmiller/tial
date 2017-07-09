@@ -81,47 +81,48 @@ Note:
 
 ##### Traversing Tree
 The parse tree generated follows the production rules for each tag. Each root is a tag, value pairing. The following is an example parse tree generated.
-Input: 5*9-4*7;
+Input: 	
+	5*9-4*7;
 Parse_Tree:
-   START:
-      BODY:
-         EXPR:
-            TERM:
-               FACTOR:
-                  NUM 5
-               TERM_OP:
-                  MUL *
-                  FACTOR:
-                     NUM 9
-                  TERM_OP:None
-            EXPR_OP:
-               SUB -
-               TERM:
-                  FACTOR:
-                     NUM 4
-                  TERM_OP:
-                     MUL *
-                     FACTOR:
-                        NUM 7
-                     TERM_OP:None
-               EXPR_OP:None
-            SEMICOLON ;
-         BODY:None
+	   START:
+	      BODY:
+	         EXPR:
+	            TERM:
+	               FACTOR:
+	                  NUM 5
+	               TERM_OP:
+	                  MUL *
+	                  FACTOR:
+	                     NUM 9
+	                  TERM_OP:None
+	            EXPR_OP:
+	               SUB -
+	               TERM:
+	                  FACTOR:
+	                     NUM 4
+	                  TERM_OP:
+	                     MUL *
+	                     FACTOR:
+	                        NUM 7
+	                     TERM_OP:None
+	               EXPR_OP:None
+	            SEMICOLON ;
+	         BODY:None
 
 * Note that the value list in (symbol, value_list) corresponds to the possible productions
-START   =	['START', 	[BODY]]
-BODY    =	['BODY', 	[EXPR, BODY]]
-EXPR    =	['EXPR', 	[TERM, EXPR_OP]]
-EXPR_OP = 	['EXPR_OP, 	[ADD, TERM, EXPR_OP] 
-						| [SUB, TERM, EXPR_OP] 
-						| [None]]
-TERM    = 	['TERM',  	[FACTOR, TERM_OP]]
-TERM_OP =   ['TERM_OP', [MUL, FACTOR, TERM_OP] |
-						| [DIV, FACTOR, TERM_OP] |
-						| [None]] 
-FACTOR  =   ['FACTOR',  [NUM] 
-						| [SUB, NUM]
-						| [L_PAREN, EXPR, R_PAREN]]
+	START   =	['START', 	[BODY]]
+	BODY    =	['BODY', 	[EXPR, BODY]]
+	EXPR    =	['EXPR', 	[TERM, EXPR_OP]]
+	EXPR_OP = 	['EXPR_OP, 	[ADD, TERM, EXPR_OP] 
+							| [SUB, TERM, EXPR_OP] 
+							| [None]]
+	TERM    = 	['TERM',  	[FACTOR, TERM_OP]]
+	TERM_OP =   ['TERM_OP', [MUL, FACTOR, TERM_OP] |
+							| [DIV, FACTOR, TERM_OP] |
+							| [None]] 
+	FACTOR  =   ['FACTOR',  [NUM] 
+							| [SUB, NUM]
+							| [L_PAREN, EXPR, R_PAREN]]
 
 NUM     = ['NUM', <LEXEME>]
 ADD     = ['ADD', '+']
