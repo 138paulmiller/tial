@@ -1,5 +1,5 @@
 ## tial
-Tial Is Another Language. It is also easy to customize :)
+Tial Is Another Language. It is also an LL(1) parser generator.
 This repository comes with the ll1 package. This package contains is used to construct an LL(1) parser to return a corresponding
 parse tree. Each node is a list such that the first element is the symbol tag, and the remaining elements are roots to other 
 nodes that correspond to one of the grammar production rules. 
@@ -10,20 +10,31 @@ The modules within this repository generate a custom parser based on the given
 grammar. Parsing the raw source code will return the root of a parse tree.
 The parse tree is generated to validate the syntax of the input. 
 #### Parse Tree
-	* The parsed nodes are lists containing [symbol, values]
-  	- Symbol is the string literal of the nonterminal
-  	- Values is a list of parse nodes that correspond to the 	
-  		nonterminals production rule
-  	
+* The parsed nodes are lists containing [symbol, value_list]
+- Symbol is the string literal of the nonterminal
+- Values is a list of parse nodes that have [symbol, value_lists] 
+	where the symbol corresponds to the 	
+	symbols production rule
+
+#### Usage
+	# The ll1 load grammar takes in the file containing grammar
+	# and the start and epsilon values used in grammar
+    	ll1_parser = ll1_load_grammar('ex_grammar.ll1','START', 'EPSILON')   
+	parse_root =  ll1_parser.parse(source_code)    
+        ll1_parser.print_tree(parse_root)
+ 
 ### LL1 Grammar File Syntax
+	
 	<symbol> = <nonterminal_symbol | terminal_symbol>
+	
 	- Single Production:
 		 <nonterminal_symbol> := <symbol1> <SPACE> <symbol2> ... <symbolN> $    		
+	
 	- Multiple Productions:
 		 <nonterminal_symbol> := <symbol1> <SPACE> <symbol2> ... <symbolN> 
-		 						| <symbol1> <SPACE> <symbol2> ... <symbolM> 
-		 						...
-		  						$    		
+					| <symbol1> <SPACE> <symbol2> ... <symbolM> 
+					...
+					$    		
 	- Terminal Definitions
 		<terminal_symbol>   := '<regular expression>' $
 
@@ -31,10 +42,11 @@ The parse tree is generated to validate the syntax of the input.
 #### Example Grammar 
 The following grammar can parse arithmetic expressions.
 Note:
--	Terminals used in the grammar are defined as nonterminals with regular expressions
+- Terminals used in the grammar are defined as nonterminals with regular expressions
 - 	The NONE keyword prevents lexer from tokenizing any matching input
 
 *ex_grammar.ll1
+
 	START 	:= BODY 
 			$
 
@@ -46,22 +58,22 @@ Note:
 	        $
 
 	EXPR_OP := ADD TERM EXPR_OP 
-			| SUB TERM EXPR_OP
-			| EPSILON
-			$
+		| SUB TERM EXPR_OP
+		| EPSILON
+		$
 
 	TERM 	:=  FACTOR TERM_OP
-			$
+		$
 
 	TERM_OP :=  MUL FACTOR TERM_OP  
-			| DIV FACTOR TERM_OP  
-			| EPSILON
-			$
+		| DIV FACTOR TERM_OP  
+		| EPSILON
+		$
 
 	FACTOR	:= NUM
-			| SUB NUM
-			| L_PAREN EXPR R_PAREN
-			$
+		| SUB NUM
+		| L_PAREN EXPR R_PAREN
+		$
 
 	L_PAREN   := '\('              $
 	R_PAREN   := '\)'              $
@@ -75,15 +87,11 @@ Note:
 
 
 #### Parse tree
-	#The ll1 load grammar takes in the file containing grammar, and the start 
-	# and epsilon values used in grammar
-    ll1_parser = ll1_load_grammar('grammar.ll1','START', 'EPSILON')    
-
-##### Traversing Tree
 The parse tree generated follows the production rules for each tag. Each root is a tag, value pairing. The following is an example parse tree generated.
-Input: 	
+
+##### Input: 	
 	5*9-4*7;
-Parse_Tree:
+##### Parse_Tree
 	   START:
 	      BODY:
 	         EXPR:
@@ -109,23 +117,23 @@ Parse_Tree:
 	            SEMICOLON ;
 	         BODY:None
 
-* Note that the value list in (symbol, value_list) corresponds to the possible productions
+##### Parse Node Traversal
+	* [SYMBOL, VALUE_LIST]
 	START   =	['START', 	[BODY]]
 	BODY    =	['BODY', 	[EXPR, BODY]]
 	EXPR    =	['EXPR', 	[TERM, EXPR_OP]]
 	EXPR_OP = 	['EXPR_OP, 	[ADD, TERM, EXPR_OP] 
-							| [SUB, TERM, EXPR_OP] 
-							| [None]]
+					| [SUB, TERM, EXPR_OP] 
+					| [None]]
 	TERM    = 	['TERM',  	[FACTOR, TERM_OP]]
-	TERM_OP =   ['TERM_OP', [MUL, FACTOR, TERM_OP] |
-							| [DIV, FACTOR, TERM_OP] |
-							| [None]] 
-	FACTOR  =   ['FACTOR',  [NUM] 
-							| [SUB, NUM]
-							| [L_PAREN, EXPR, R_PAREN]]
-
-NUM     = ['NUM', <LEXEME>]
-ADD     = ['ADD', '+']
-SUB     = ['SUB', '-']
-MUL     = ['MUL', '*']
-DIV     = ['DIV', '/']
+	TERM_OP =   	['TERM_OP', 	[MUL, FACTOR, TERM_OP] 
+					| [DIV, FACTOR, TERM_OP] 
+					| [None]] 
+	FACTOR  =   	['FACTOR',  	[NUM] 
+					| [SUB, NUM]
+					| [L_PAREN, EXPR, R_PAREN]]
+	NUM     = ['NUM', <matched_input>]
+	ADD     = ['ADD', '+']
+	SUB     = ['SUB', '-']
+	MUL     = ['MUL', '*']
+	DIV     = ['DIV', '/']
