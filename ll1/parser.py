@@ -2,9 +2,9 @@ from ll1 import log
 from ll1 import lexer
 
 class ll1_parser(object):
-    def __init__(self, token_definitions, parse_table):
+    def __init__(self, lexemes, parse_table):
         self.table = parse_table
-        self.token_definitions = token_definitions 
+        self.lexemes = lexemes 
     '''  Parse 
         input - raw input string to tokenize and parse
             tokenizes input string into list of tokens, returned by lexer 
@@ -14,7 +14,7 @@ class ll1_parser(object):
         returns - parse tree's root token
     '''
     def parse(self, input):
-        tokens =  lexer.lex(input, self.token_definitions)
+        tokens =  lexer.lex(input, self.lexemes)
         if len(tokens) <= 0:
             log.error('No TOKENS')
             return None
@@ -59,7 +59,7 @@ class ll1_parser(object):
                 for rule_tag in self.table[root_tag][next_tag]:
                     # parse the remaining tokens for the rule
                     if rule_tag != self.table.EPSILON:
-                        # if not epsilon, attempt to parse the remaining tokens for the given symbol in the rule
+                        # if not epsilon, attempt to parse the remaining tokens for the given symbol in the rule                        
                         rule_token = self.parse_token([rule_tag, None], tokens)
                         # if rule token parsed is valid and is a token pair(tag, value)
                         if rule_token != None and len(rule_token) > 1:
@@ -109,11 +109,11 @@ class ll1_parser(object):
         # end parse loop
         if valid:
             log.debug('VALIDATION: SUCCESS')
-            print token_stack
+
         else:
             log.error('VALIDATION: FAILED, No RULE in TABLE[top_token][next_token]')
-            log.error('TOKEN STACK: ' + str(token_stack))
-            log.error('NEXT TOKENS: ' + str(tokens[index:-1]) + '\n')
+            log.error('TOP TOKEN: ' + str(top_token))
+            log.error('NEXT TOKEN: ' + str( tokens[index]) + '\n')
 
         return valid
 
@@ -142,5 +142,5 @@ class ll1_parser(object):
                 print_str = tag + ' ' + str(value_list)
             # green tree
             return '\n\033[32m' +tab + print_str # show tag and values
-        return '\033[32m EPSILON' 
+        return 'None' 
 

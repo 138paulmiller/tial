@@ -17,29 +17,42 @@ import parse_table
 	start_sym - the tag for the symbol in grammer used as start
 	epsilon_sym the tag symbol in grammer used as epsilon 
 	
-	token_definitions - define the terminal symbols used in grammer, the individual tokens
+	lexemes - define the terminal symbols used in grammer, the individual tokens
 						the parser will try to match in input string 
 '''
-def ll1_init(grammar, start_sym, epsilon_sym, token_definitions):
+def ll1_init(grammar, start_sym, epsilon_sym, lexemes):
 	table = parse_table.ll1_parse_table(grammar, start_sym, epsilon_sym)
-	return parser.ll1_parser(token_definitions, table) # create ll1 parser from token_definitions ll1 table
+	return parser.ll1_parser(lexemes, table) # create ll1 parser from lexemes ll1 table
 
 
 def ll1_load_grammar(grammar_filename, start_sym, epsilon_sym):
 	# 
 	lexemes = []
 	rule_map = {}
+	#rule_callback_map = {}
 	file = open(grammar_filename)
 	if file != None:
 		i = 0
 		lines = file.read().split('$') # split each production rule seperated by $
 		for line in lines:
-			pair = line.split(':=') # split symbol and rule
-			if len(pair) == 2:
-				symbol = pair[0].strip()
+			production = line.split(':=') # split symbol, rule
+			if len(production) == 2:
+				# split rule and rule callback
+				symbol = production[0].strip() 
 				rule_list = [] 
 			 	has_rule = True
-			   	for rules in pair[1].split('|'):
+			 	# handle user defined callback methods, currently must use recursive descent 
+			 	# rule_pair = production[1].split('{') # split into two, rules and callback
+			 	# if len(rule_pair) == 2: # if callback then add it
+			 	# 	# rule_pair.split('}') = ['module.func', '']
+				 # 	# callback should be module.func so split('.')
+				 # 	callback = rule_pair[1].strip().split('}')[0].split('.') # get func name
+				 # 	module = __import__(callback[0].strip())
+					# func = getattr(module, callback[1].strip())
+				 # 	rule_callback_map[symbol] = func
+			   	#for rules in rule_pair[0].split('|'):
+			  	
+			   	for rules in production[1].split('|'):
 			  		rule = []
 			  		rules = rules.strip()
 			  		if rules[0] == '\'': # parse terminal regex
@@ -59,7 +72,11 @@ def ll1_load_grammar(grammar_filename, start_sym, epsilon_sym):
 	else:
 		print "Could not open Grammar File ", grammar_filename 
 		return None
-
+	# print 'LEXEMES'
+	# for l in lexemes:
+	# 	print l[0], ' ::= ', l[1]
+	# for symbol in rule_map:
+	# 	print symbol, '::=', rule_map[symbol], ' --> ', rule_callback_map[symbol] 
 	return  ll1_init(rule_map, start_sym, epsilon_sym, lexemes)
     
 

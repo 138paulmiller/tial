@@ -1,27 +1,49 @@
-START       := BODY      
+START       := BODY 
             $
 
-BODY        := STMT BODY
-            | FUNC_DEF BODY 
+BODY        := STMT SEMICOLON BODY
             | EPSILON         
+             $
+STMT        := ASSIGN_STMT
+            |  FUNC_DEF
+            | EXPR 
             $
 
-FUNC_DEF    := DEF ID L_PAREN ARGS R_PAREN  BODY RETURN ARGS SEMICOLON 
+FUNC_CALL   := ID FUNC_ARGS
             $
 
-STMT        := ID ASSIGN EXPR SEMICOLON 
+FUNC_DEF    := DEF ID L_PAREN PARAMS R_PAREN BODY RETURN EXPR  
             $
 
-ARGS        := EXPR EXPR_LIST
- 		| EPSILON 
+PARAMS      := ID ID_LIST 
+            | EPSILON 
+            $
+
+
+ID_LIST      := COMMA ID ID_LIST 
+            | EPSILON 
+            $
+
+
+
+FUNC_ARGS   :=  L_PAREN ARGS R_PAREN 
+            | EPSILON              
+            $
+
+ARGS        := EXPR EXPR_LIST 
+            | EPSILON  
+            $
+
+ASSIGN_STMT := LET ID ASSIGN EXPR  
+                  $
+
+EXPR_LIST   := COMMA EXPR EXPR_LIST
+            | EPSILON 
             $
 
 EXPR        := TERM EXPR_OP 
             $
 
-EXPR_LIST   := COMMA EXPR EXPR_LIST
-            | EPSILON 
-            $
 
 EXPR_OP     := ADD TERM EXPR_OP 
             | SUB TERM EXPR_OP
@@ -35,18 +57,14 @@ TERM_OP     := MUL FACTOR TERM_OP
             | DIV FACTOR TERM_OP 
             | EPSILON 
             $
-
 FACTOR      := NUM
-            | ID FUNC_CALL
+            | STR
+            | FUNC_CALL
             | L_PAREN EXPR R_PAREN 
             $
 
-FUNC_CALL   :=  L_PAREN  ARGS R_PAREN 
-            | EPSILON              
-            $
-
-
 NUM 	      := '-?[0-9]*\.?[0-9]+'        $
+LET         := 'let'                      $
 AND 	      := 'and'                      $
 OR 		:= 'or'                       $
 NOT     	:= 'not'                      $
@@ -70,7 +88,7 @@ DEF     	:= 'def'                      $
 SEMICOLON   := ';'                        $
 COMMA     	:= ','                        $      
 ID     	:= '[a-zA-Z_][a-zA-Z0-9_]*'   $
-STR     	:= '\"[a-zA-Z0-9_ ]+\"'       $
+STR     	:= '"[a-zA-Z0-9_ ]+"'         $
 NONE     	:= '[ \t\n]+'                 $
 NONE        := '#[ \t\w]+[^\n]+'          $ 
 

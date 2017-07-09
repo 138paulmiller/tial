@@ -90,7 +90,7 @@ class ll1_parse_table(dict):
 
     #returns string representation of table
     def __repr__(self):
-        table = 'Parse Table'
+        table = 'Parse Table\n'
         for symbol in self.keys():
             table += symbol + ':\n'
             for first in self[symbol].keys():

@@ -1,0 +1,5 @@
+#!/bin/sh
+# test demo
+#To generate human readable LLVM IR
+clang -emit-llvm -S foo.c main.c
+

@@ -1,0 +1,10 @@
+#To statically compile Human Readable LLVM IR to a linkable object
+for mir in $@
+do
+    echo $mir
+	llc -filetype=obj $mir
+done
+
+#To link 
+
+clang *.o -o test
