@@ -26,6 +26,8 @@ will be in order to the given production rule if the node is a nonterminal.
         ll1_parser.print_tree(parse_root)
  
 #### LL1 Grammar File Syntax
+The parse generated the parser from an ll1 grammar file.
+- Note that symbol can either be a nonterminal or terminal symbol
 
 ###### Single Production:
 	<nonterminal_symbol> 	:= <symbol1> <SPACE> <symbol2> ... <symbolN> $    		
@@ -38,7 +40,6 @@ will be in order to the given production rule if the node is a nonterminal.
 	<terminal_symbol>   	:= '<regular expression>' $
 	If terminal_symbol is None, then the parser will ignore any tokens with the given regular expression
 	
-- Note that <symbol> can either be a nonterminal or terminal symbol
 
 ##### Example Grammar 
 The following grammar can parse arithmetic expressions.
