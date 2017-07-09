@@ -1,20 +1,22 @@
 ## tial
 Tial Is Another Language. It is also an LL(1) parser generator.
 This repository comes with the ll1 package. This package contains is used to construct an LL(1) parser to return a corresponding
-parse tree. Each node is a list such that the first element is the symbol tag, and the remaining elements are roots to other 
-nodes that correspond to one of the grammar production rules. 
+parse tree. 
 
-### Building a Custom Language
+#### Building a Custom Language
 This project bridges the gap between the grammar definition and evaluation stage.
 The modules within this repository generate a custom parser based on the given 
 grammar. Parsing the raw source code will return the root of a parse tree.
-The parse tree is generated to validate the syntax of the input. 
+
+#### Parse Node
+ Each node is list comprised of a [symbol, value_list] pairing
+- Symbol 	: a string literal representation of symbol
+- Value_list 	: a list of parse nodes that are in order of production rule
+		If the node is a nonterminal, the node contains [symbol, lexeme]
 #### Parse Tree
-* The parsed nodes are lists containing [symbol, value_list]
-- Symbol is the string literal of the nonterminal
-- Values is a list of parse nodes that have [symbol, value_lists] 
-	where the symbol corresponds to the 	
-	symbols production rule
+The parse tree is the root node where the symbol is equal to the start symbol in the grammar. 
+To traverse the parse tree, recursively descent down the value_lists of each node. The nodes in the value_list
+will be in order to the given production rule if the node is a nonterminal.
 
 #### Usage
 	# The ll1 load grammar takes in the file containing grammar
@@ -23,32 +25,27 @@ The parse tree is generated to validate the syntax of the input.
 	parse_root =  ll1_parser.parse(source_code)    
         ll1_parser.print_tree(parse_root)
  
-### LL1 Grammar File Syntax
-	
-	<symbol> = <nonterminal_symbol | terminal_symbol>
-	
-	- Single Production:
-		 <nonterminal_symbol> := <symbol1> <SPACE> <symbol2> ... <symbolN> $    		
-	
-	- Multiple Productions:
-		 <nonterminal_symbol> := <symbol1> <SPACE> <symbol2> ... <symbolN> 
-					| <symbol1> <SPACE> <symbol2> ... <symbolM> 
-					...
-					$    		
-	- Terminal Definitions
-		<terminal_symbol>   := '<regular expression>' $
+#### LL1 Grammar File Syntax
 
+###### Single Production:
+	<nonterminal_symbol> 	:= <symbol1> <SPACE> <symbol2> ... <symbolN> $    		
 
-#### Example Grammar 
+###### Multiple Productions:
+	 <nonterminal_symbol> 	:= <symbol1> <SPACE> <symbol2> ... <symbolN> 
+				| <symbol1> <SPACE> <symbol2> ... <symbolM> 
+				| ... $
+###### Terminal Definitions
+	<terminal_symbol>   	:= '<regular expression>' $
+	If terminal_symbol is None, then the parser will ignore any tokens with the given regular expression
+	
+- Note that <symbol> can either be a nonterminal or terminal symbol
+
+##### Example Grammar 
 The following grammar can parse arithmetic expressions.
-Note:
-- Terminals used in the grammar are defined as nonterminals with regular expressions
-- 	The NONE keyword prevents lexer from tokenizing any matching input
-
-*ex_grammar.ll1
+Found in File: ex_grammar.ll1
 
 	START 	:= BODY 
-			$
+		$
 
 	BODY 	:= EXPR BODY
 	        | EPSILON
@@ -86,12 +83,9 @@ Note:
 	NONE      := '[ \t\n]+'        $
 
 
-#### Parse tree
-The parse tree generated follows the production rules for each tag. Each root is a tag, value pairing. The following is an example parse tree generated.
-
 ##### Input: 	
 	5*9-4*7;
-##### Parse_Tree
+#####  Generated Tree
 	   START:
 	      BODY:
 	         EXPR:
@@ -117,9 +111,8 @@ The parse tree generated follows the production rules for each tag. Each root is
 	            SEMICOLON ;
 	         BODY:None
 
-##### Parse Node Traversal
-	* [SYMBOL, VALUE_LIST]
-	START   =	['START', 	[BODY]]
+##### Parse Tree Traversal
+	ROOT    =	['START', 	[BODY]]
 	BODY    =	['BODY', 	[EXPR, BODY]]
 	EXPR    =	['EXPR', 	[TERM, EXPR_OP]]
 	EXPR_OP = 	['EXPR_OP, 	[ADD, TERM, EXPR_OP] 
@@ -132,8 +125,8 @@ The parse tree generated follows the production rules for each tag. Each root is
 	FACTOR  =   	['FACTOR',  	[NUM] 
 					| [SUB, NUM]
 					| [L_PAREN, EXPR, R_PAREN]]
-	NUM     = ['NUM', <matched_input>]
-	ADD     = ['ADD', '+']
-	SUB     = ['SUB', '-']
-	MUL     = ['MUL', '*']
-	DIV     = ['DIV', '/']
+	NUM     = 	['NUM', <lexeme>]
+	ADD     = 	['ADD', '+']
+	SUB     = 	['SUB', '-']
+	MUL     = 	['MUL', '*']
+	DIV     = 	['DIV', '/']
