@@ -4,21 +4,21 @@ import ir_gen
 #	A := B C
 # rootA = [symbol, [rootB, rootC]]
 # base node 
-var_ptr_map = {}
 
 def start_ir(root, ir_builder):
 	'''
 	BODY
 	'''
-	printf = ir_builder.make_func('printf', ll.IntType(32), (ll.IntType(8).as_pointer(),), var_arg=True)
-	start = ir_builder.make_func('start', ll.IntType(32), (ll.IntType(32),))
- # append a body to it if definition
+	#printf = ir_builder.make_func('printf', ll.IntType(32), (ll.IntType(8).as_pointer(),), var_arg=True)
+	start = ir_builder.make_func('start', ll.IntType(32), ())
+ 	# append a body to it if definition
 	block = start.append_basic_block() # append a block to the function
 	ir_builder.builder.position_at_end(block) # move builder to end of fuction entry block
 	# define printf												# voidptr
 	body_ir(root[1][0], ir_builder)
 	ir_builder.builder.position_at_end(block) # move builder to end of fuction entry block
 	ir_builder.builder.ret(ll.Constant(ll.IntType(32), 0))
+
 
 def body_ir(root, ir_builder ):
 	'''
@@ -44,6 +44,7 @@ def stmt_ir(root, ir_builder):
 	elif next_symbol == 'EXPR':
 		expr_ir(root[1][0], ir_builder)
 
+
 def assign_stmt_ir(root,  ir_builder):
 	'''
 	root[1] = [LET ID ASSIGN EXPR]		
@@ -51,8 +52,6 @@ def assign_stmt_ir(root,  ir_builder):
 	id_token = root[1][1] 
 	expr=  root[1][3]
 	value = expr_ir(expr, ir_builder)
-	print id_token[1], '==VALUE:', str(value)
-	raw_input('..')
 	ir_builder.make_var(id_token[1], value, ll.FloatType())
 
 
@@ -82,20 +81,22 @@ def func_def_ir(root, ir_builder):
 	if params != None:
 		for param in params:
 			param_types.append(ll.FloatType())
-
+	parent_block = ir_builder.builder.block
 	func = ir_builder.make_func(id_token[1], ll.FloatType() ,param_types)
 	i=0
 	for arg in func.args:
 		arg.name = params[i]
 		ir_builder.set_var(arg.name, arg)
 		i+=1	
-	# pop all vars from builder
 	block = func.append_basic_block()
 	ir_builder.builder.position_at_end(block) # move builder to end of fuction entry block
 	body_ir(root[1][5], ir_builder)
 	return_expr = expr_ir(root[1][7], ir_builder)
-	raw_input(return_expr)
-	ir_builder.builder.ret(ll.Constant(ll.FloatType(), return_expr))
+	# pop all vars from builder
+	for arg in func.args:
+		ir_builder.rm_var(arg.name, arg)
+	ir_builder.builder.ret( return_expr)
+	ir_builder.builder.position_at_end(parent_block) # go back to parent block before function definition
 	return func
 
 
@@ -207,8 +208,8 @@ def expr_op_ir(root, ir_builder):
 	# unary, if sub make negative
 	term = None
 	if root[1][0] != None:
-		if root[1][0] == 'SUB':
-			term = ir_builder.builder.neg(term_ir(root[1][1]))
+		if root[1][0][0] == 'SUB':
+			term = ir_builder.builder.fmul(term_ir(root[1][1], ir_builder), ll.Constant(ll.FloatType(), -1))
 		else:
 			term = term_ir(root[1][1], ir_builder)
 			expr_op = expr_op_ir(root[1][2], ir_builder)
@@ -236,7 +237,7 @@ def term_op_ir(root, ir_builder):
 	'''
 	factor = None
 	if root[1][0] != None:
-		if root[1][0] == 'DIV':
+		if root[1][0][0] == 'DIV':
 			factor = ir_builder.builder.fdiv(ll.Constant(ll.FloatType(), 1), factor(root[1][1]))
 		else:
 			factor = factor_ir(root[1][1], ir_builder)
@@ -249,6 +250,7 @@ def term_op_ir(root, ir_builder):
 def factor_ir(root, ir_builder):
 	'''
 	NUM
+	| SUB NUM
     | STR
     | FUNC_CALL
     | L_PAREN EXPR R_PAREN 
@@ -256,9 +258,12 @@ def factor_ir(root, ir_builder):
 	factor = None
 	next_symbol = root[1][0][0]
 	# root[1] is value_list so root[1][0] is first token
-	if next_symbol == 'NUM':
+	if next_symbol == 'SUB':
+		factor = ll.Constant(ll.FloatType(), -1*float(root[1][1][1]))
+	elif next_symbol == 'NUM':
 		factor = ll.Constant(ll.FloatType(), float(root[1][0][1]))
 	elif next_symbol == 'STR':
+		# TODO NOT WORKING!!!!!!!!!!!!!!!
 		raw_str = (root[1][0][1]+'\00').encode('ascii')
 		bytes = bytearray(raw_str)
 		arr_type = ll.ArrayType(ll.IntType(8), len(bytes))
@@ -268,13 +273,11 @@ def factor_ir(root, ir_builder):
 		fmt_ptr = ir_builder.builder.alloca(ll.IntType(8).as_pointer())
 		factor = ir_builder.builder.store(fmt_bytes, fmt_ptr)
 		raw_input("PTR:" +   str(fmt_ptr))
-		# index = ll.Constant(ll.IntType(8), 0)
-		# factor = ir_builder.builder.gep(fmt_ptr, [index])
-
-		# var_ptr = ir_builder.builder.alloca(ll.IntType(8).as_pointer())
-		# factor = ir_builder.builder.load(var_ptr)
 		
 	elif next_symbol == 'FUNC_CALL':
 		return func_call_ir(root[1][0], ir_builder)	
+	elif next_symbol == 'L_PAREN':
+		return expr_ir(root[1][1], ir_builder)	
+	
 	return factor
 

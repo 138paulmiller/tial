@@ -6,5 +6,4 @@ do
 done
 
 #To link 
-
 clang *.o -o test

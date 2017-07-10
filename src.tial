@@ -1,19 +1,10 @@
-g = 0; # global
-
-def first(a, b, c)
-	l = a + b + c ; #local sum 
-	g = l*l;
+# Example functions to be called from main.c
+# To export as an object file 
+# ./tial src.tial
+def sum(a, b, c)
+	let l = a + b + c ; #local sum 
 	return l;
 
- def second(a)
- 	g =  g / a;
- 	return g;
-
-# comments !!
- def third(g)
- 	g = g  * 2; # after line comment
- 	return g / 2;
-
-v1 = first(5, 10, 15);
-v2 = second(v1);
-v3 = third(4); 
+def foo(a)
+	let sum = sum(a,a,a)-3;
+	return sum+3-2;

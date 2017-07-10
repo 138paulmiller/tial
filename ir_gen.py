@@ -17,6 +17,7 @@ class ir_engine():
 	def compile(self, module, objfile=None):
 		# Create a LLVM module object from the IR
 		asm_module = bind.parse_assembly(str(module)) # get llvm ir string to parse 
+		print "PARSED ASM:"
 		asm_module.verify()
 	    # Now add the module and make sure it is ready for execution
 		self.engine.add_module(asm_module)
@@ -24,7 +25,6 @@ class ir_engine():
 		if objfile != None: # write to an obj
 			file = open(objfile, "wb")
 			obj = self.target_machine.emit_object(asm_module)
-			print "EMIT OBJ:", obj
 			file.write(obj)
 			file.close()
 
@@ -35,10 +35,7 @@ class ir_engine():
 		    	# Look up the function pointer (a Python int)
 		return self.engine.get_function_address(func_id)
 		
-    
-	def shutdown():
-		bind.shutdown()
-
+		
 
 # Class used to simplify building ir instructions
 class ir_builder():
@@ -64,14 +61,18 @@ class ir_builder():
 			print 'IR_GEN ERROR: Variable: ', name, ' not declared or defined!'
 		return None
 
+	def rm_var(self, name, value):
+		self.var_map.pop(name) 
+
+
+
 	def set_var(self, name, value):
 		self.var_map[name] =  value
+
 
 	def call_func(self, name, args):
 		if name in self.func_map:
 			func = self.func_map[name]
-			print func
-			raw_input()
 			return self.builder.call(func, args)
 		else:
 			print 'IR_GEN ERROR: Function: ', name, ' not declared!'
