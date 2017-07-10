@@ -1,5 +1,4 @@
-import llvmlite.ir as ll
-import ir_gen
+import llvmlite.ir as ir
 # example production
 #	A := B C
 # rootA = [symbol, [rootB, rootC]]
@@ -9,15 +8,15 @@ def start_ir(root, ir_builder):
 	'''
 	BODY
 	'''
-	#printf = ir_builder.make_func('printf', ll.IntType(32), (ll.IntType(8).as_pointer(),), var_arg=True)
-	start = ir_builder.make_func('start', ll.IntType(32), ())
+	#printf = ir_builder.make_func('printf', ir.IntType(32), (ir.IntType(8).as_pointer(),), var_arg=True)
+	start = ir_builder.make_func('start', ir.IntType(32), ())
  	# append a body to it if definition
 	block = start.append_basic_block() # append a block to the function
 	ir_builder.builder.position_at_end(block) # move builder to end of fuction entry block
 	# define printf												# voidptr
 	body_ir(root[1][0], ir_builder)
 	ir_builder.builder.position_at_end(block) # move builder to end of fuction entry block
-	ir_builder.builder.ret(ll.Constant(ll.IntType(32), 0))
+	ir_builder.builder.ret(ir.Constant(ir.IntType(32), 0))
 
 
 def body_ir(root, ir_builder ):
@@ -52,7 +51,7 @@ def assign_stmt_ir(root,  ir_builder):
 	id_token = root[1][1] 
 	expr=  root[1][3]
 	value = expr_ir(expr, ir_builder)
-	ir_builder.make_var(id_token[1], value, ll.FloatType())
+	ir_builder.make_var(id_token[1], value, ir.FloatType())
 
 
 def  func_call_ir(root, ir_builder):
@@ -80,9 +79,9 @@ def func_def_ir(root, ir_builder):
 	params=  params_ir(root[1][3],ir_builder)
 	if params != None:
 		for param in params:
-			param_types.append(ll.FloatType())
+			param_types.append(ir.FloatType())
 	parent_block = ir_builder.builder.block
-	func = ir_builder.make_func(id_token[1], ll.FloatType() ,param_types)
+	func = ir_builder.make_func(id_token[1], ir.FloatType() ,param_types)
 	i=0
 	for arg in func.args:
 		arg.name = params[i]
@@ -209,7 +208,7 @@ def expr_op_ir(root, ir_builder):
 	term = None
 	if root[1][0] != None:
 		if root[1][0][0] == 'SUB':
-			term = ir_builder.builder.fmul(term_ir(root[1][1], ir_builder), ll.Constant(ll.FloatType(), -1))
+			term = ir_builder.builder.fmul(term_ir(root[1][1], ir_builder), ir.Constant(ir.FloatType(), -1))
 		else:
 			term = term_ir(root[1][1], ir_builder)
 			expr_op = expr_op_ir(root[1][2], ir_builder)
@@ -238,7 +237,7 @@ def term_op_ir(root, ir_builder):
 	factor = None
 	if root[1][0] != None:
 		if root[1][0][0] == 'DIV':
-			factor = ir_builder.builder.fdiv(ll.Constant(ll.FloatType(), 1), factor(root[1][1]))
+			factor = ir_builder.builder.fdiv(ir.Constant(ir.FloatType(), 1), factor(root[1][1]))
 		else:
 			factor = factor_ir(root[1][1], ir_builder)
 			term_op = expr_op_ir(root[1][2], ir_builder)
@@ -259,18 +258,18 @@ def factor_ir(root, ir_builder):
 	next_symbol = root[1][0][0]
 	# root[1] is value_list so root[1][0] is first token
 	if next_symbol == 'SUB':
-		factor = ll.Constant(ll.FloatType(), -1*float(root[1][1][1]))
+		factor = ir.Constant(ir.FloatType(), -1*float(root[1][1][1]))
 	elif next_symbol == 'NUM':
-		factor = ll.Constant(ll.FloatType(), float(root[1][0][1]))
+		factor = ir.Constant(ir.FloatType(), float(root[1][0][1]))
 	elif next_symbol == 'STR':
 		# TODO NOT WORKING!!!!!!!!!!!!!!!
 		raw_str = (root[1][0][1]+'\00').encode('ascii')
 		bytes = bytearray(raw_str)
-		arr_type = ll.ArrayType(ll.IntType(8), len(bytes))
-		fmt_bytes =  ll.Constant(arr_type, bytes)
-		fmt_bytes =  ir_builder.builder.bitcast(fmt_bytes, ll.IntType(8).as_pointer()) 
+		arr_type = ir.ArrayType(ir.IntType(8), len(bytes))
+		fmt_bytes =  ir.Constant(arr_type, bytes)
+		fmt_bytes =  ir_builder.builder.bitcast(fmt_bytes, ir.IntType(8).as_pointer()) 
 		raw_input("BYTES:" +   str(fmt_bytes))
-		fmt_ptr = ir_builder.builder.alloca(ll.IntType(8).as_pointer())
+		fmt_ptr = ir_builder.builder.alloca(ir.IntType(8).as_pointer())
 		factor = ir_builder.builder.store(fmt_bytes, fmt_ptr)
 		raw_input("PTR:" +   str(fmt_ptr))
 		

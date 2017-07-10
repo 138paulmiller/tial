@@ -1,0 +1,12 @@
+#!/bin/bash
+# usage <sourceedirectory> <out name>
+#compiles all c programs into object files
+# Links all objects into an executable
+echo './tial $1/*.tial'
+
+./tial "$1"/*.tial
+echo clang -c "$1"*.c
+clang -c "$1"*.c
+mv *.o "$1"
+echo clang   "$1"*.o -o "$2"
+clang  "$1"*o -o "$2"
