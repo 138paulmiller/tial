@@ -20,11 +20,13 @@ To traverse the parse tree, recursively descent down the value_lists of each nod
 will be in order to the given production rule if the node is a nonterminal.
 
 #### Usage
-	# The ll1 load grammar takes in the file containing grammar
-	# and the start and epsilon values used in grammar
-    	ll1_parser = ll1_load_grammar('ex_grammar.ll1','START', 'EPSILON')   
+	'''
+	The ll1 load grammar takes in the file containing grammar
+	and the start and epsilon values used in grammar
+	'''
+	ll1_parser = ll1_load_grammar('ex_grammar.ll1','START', 'EPSILON')   
 	parse_root =  ll1_parser.parse(source_code)    
-        ll1_parser.print_tree(parse_root)
+	ll1_parser.print_tree(parse_root)
  
 #### LL1 Grammar File Syntax
 The parse generated the parser from an ll1 grammar file.
