@@ -1,7 +1,8 @@
 ## tial
 Tial Is Another Language. It is also an LL(1) parser generator.
-This repository comes with the ll1 package. This package contains is used to construct an LL(1) parser to return a corresponding
-parse tree. 
+This repository comes with the ll1 package. 
+This package is used to construct an LL(1) parser from a grammar
+and will generate corresponding parse tree from input source. 
 
 #### Building a Custom Language
 This project bridges the gap between the grammar definition and evaluation stage.
